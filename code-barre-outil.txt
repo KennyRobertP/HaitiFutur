@@ -1,0 +1,3383 @@
+global gKeyboardArray
+global gKeyboardType
+global gShiftEngaged
+global gForms, gFormColor
+global gCurrentOperator, gCurrentTotal, gNewNumber
+global gHorizontal, gVertical
+global gZoomLevel, gZoomSelected
+global gField
+
+on preOpenStack
+   if the environment is not "development" then
+      set the fullscreenmode of me to "exactFit"
+      set the fullscreen of me to true
+   end if
+end preOpenStack
+
+#Mise en page de la page de couverture
+command setupCoverPage
+   #Positionnement des logos des partenaires
+   put 1 into lctr
+   repeat while lctr <= 2
+       set the threeD of btn ("btn-logo" & lctr) to false
+      set the opaque of btn ("btn-logo" & lctr) to false
+      set the showBorder of btn ("btn-logo" & lctr) to false
+      set the borderWidth of btn ("btn-logo" & lctr) to 0
+      set the width of btn ("btn-logo" & lctr) to 150
+      set the height of btn ("btn-logo" & lctr) to 150
+      set showName of btn ("btn-logo" & lctr) to false
+      set the layer of btn ("btn-logo" & lctr) to top
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-logo1" to "logo_haiti_futur.png"
+   set the icon of btn "btn-logo2" to "esih_logo.png"
+   set the loc of btn "btn-logo1" to 75,75
+   set the lockLoc of btn "btn-logo1" to true
+   set the loc of btn "btn-logo2" to 1265,75
+   set the lockLoc of btn "btn-logo2" to true
+   set the script of btn "btn-logo2" to "on mouseUp" &cr & "launch url " & quote & "http://www.esih.edu" & quote & "" & cr & "end mouseUp"
+   set the script of btn "btn-logo1" to "on mouseUp" & cr & "launch URL " & quote & "http://www.haitifutur.com" & quote & "" & cr& "end mouseUp"
+
+   #positionnement du titre de la page de couverture
+   set the loc of fld "fld-page-couverture" to 682,65
+   set the lockLoc of fld "fld-page-couverture" to true
+   set the lockText of fld "fld-page-couverture" to true
+   set the textAlign of fld "fld-page-couverture" to "center"
+   set the width of fld "fld-page-couverture" to 1104
+   set the height of fld "fld-page-couverture" to 100
+   set the textSize of fld "fld-page-couverture" to 36
+   set the showBorder of fld "fld-page-couverture" to false
+   set the borderWidth of fld "fld-page-couverture" to 0
+
+   #positionnement du bouton central
+   set the loc of btn "btn-obj" to 682, 384
+   set the width of btn "btn-obj" to 400
+   set the height of btn "btn-obj" to 400
+   set the lockLoc of btn "btn-obj" to true
+   set threeD of btn "btn-obj" to false
+   set showName of btn "btn-obj" to false
+   set showBorder of btn "btn-obj" to false
+   set opaque of btn "btn-obj" to false
+   set borderWidth of btn "btn-obj" to 0
+
+   #positionnement du pied de page
+   set the loc of btn "btn-bas-page" to 682,710
+   set the height of btn "btn-bas-page" to 75
+   set the width of btn "btn-bas-page" to 250
+   set the label of btn "btn-bas-page" to "MENFP"
+   set the threeD of btn "btn-bas-page" to false
+   set the opaque of btn "btn-bas-page" to false
+   set the textSize of btn "btn-bas-page" to 36
+   set the textAlign of btn "btn-bas-page" to "center"
+   set the showBorder of btn "btn-bas-page" to false
+   set the borderWidth of btn "btn-bas-page" to 0
+end setupCoverPage
+
+#Boutons de navigation entre les pages
+command navigationButtons
+   put 1 into lctr
+   repeat while lctr <= 2
+      set the threeD of btn ("btn-nav" & lctr) to false
+      set the opaque of btn ("btn-nav" & lctr) to false
+      set the showBorder of btn ("btn-nav" & lctr) to false
+      set the borderWidth of btn ("btn-nav" & lctr) to 0
+      set the width of btn ("btn-nav" & lctr) to 50
+      set the height of btn ("btn-nav" & lctr) to 50
+      set showName of btn ("btn-nav" & lctr) to false
+      set the layer of btn ("btn-nav" & lctr) to top
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-nav1" to "left_chevron.png"
+   set loc of btn "btn-nav1" to 40,384
+   set the script of btn "btn-nav1" to "on mouseUp" & cr & "go to previous card" & cr & "end mouseUp"
+   set the loc of btn "btn-nav2" to 1322,384
+   set the icon of btn "btn-nav2" to "right_chevron.png"
+   set the script of btn "btn-nav2" to "on mouseUp" & cr & "go to next card" & cr & "end mouseUp"
+   #Gestion des boutons des pages externes
+   put the number of the current card into lCardNumber
+   put the number of the first card into lFirstCardNumber
+   put the number of the last card into lLastCardNumber
+   if lCardNumber = lFirstCardNumber then
+      set visible of btn "btn-nav1" to false
+   else if lCardNumber =lLastCardNumber then
+      set visible of btn "btn-nav2" to false
+   end if
+end navigationButtons
+
+#gestion de la pagination
+command createPagination
+   put the number of the current card into lCurrentCard
+   put the number of the last card into lLastCard
+   add - 1 to lCurrentCard
+   add - 1 to lLastCard
+   set the width of btn "btn-pagination" to 75
+   set the width of btn "btn-pagination" to 75
+   set opaque of btn "btn-pagination" to true
+   set loc of btn "btn-pagination" to 1314, 718
+   set the lockLoc of btn "btn-pagination" to true
+   set the label btn "btn-pagination" to "" & lCurrentCard & " / " & lLastCard
+   set the showBorder of btn "btn-pagination" to false
+   set borderWidth of btn "btn-pagination" to 0
+   set showName of btn "btn-pagination" to true
+   set textSize of btn "btn-pagination" to 24
+end createPagination
+
+# Gestion des titres et pictos des pages d'activite
+command setupActivitySlide   
+   set the width of field "fld-titre" to 1024   
+   set the height of field "fld-titre" to 75   
+   set the loc of field "fld-titre" to 682, 50   
+   set the lockLoc of field "fld-titre" to true   
+   set the showBorder of field "fld-titre" to false   
+   set the borderWidth of field "fld-titre" to 0   
+   set textSize of field "fld-titre" to 32   
+   set lockText of field "fld-titre" to true
+   set the layer of field "fld-titre" to 1
+   set the textAlign of fld "fld-titre" to "center"
+
+   set the width of btn "btn-picto" to 75   
+   set the height of btn "btn-picto" to 75   
+   set the loc of btn "btn-picto" to 38,38  
+   set the lockLoc of btn "btn-picto" to true   
+   set the showBorder of btn "btn-picto" to false   
+   set the borderwidth of btn "btn-picto" to 0   
+   set the opaque of btn "btn-picto" to false   
+   set the threeD of btn "btn-picto" to false
+   set the showName of btn "btn-picto" to false
+   set the label of btn "btn-picto" to "picto"
+   set the layer of btn "btn-picto" to 1
+end setupActivitySlide
+
+#mise en place de la barre d'outils
+command setupToolbar
+   set the height of btn "btn-outils" to 50
+   set the width of btn "btn-outils" to 50
+   set the loc of btn "btn-outils" to 40, 708
+   set the lockLoc of btn "btn-outils" to true
+   set the showName of btn "btn-outils" to false
+   set the opaque of btn "btn-outils" to false
+   set the threeD of btn "btn-outils" to false
+   set the icon of btn "btn-outils" to "gears.jpg"
+   set the showBorder of btn "btn-outils" to false
+   set the borderWidth of btn "btn-outils" to 0
+   set the layer of btn "btn-outils" to 1
+   set the script of btn "btn-outils" to "local lHorVer" & cr & "put 0 into lHorVer" & cr & " on mouseUp" & cr & "   if lHorVer = 0 then" & cr & "      showHorVer" & cr & "      put 1 into lHorVer" & cr & "   else if lHorVer = 1 then" & cr & "      hideHorVer" & cr & "      put 0 into lHorVer" & cr & "   end if" & cr & "end mouseUp"
+
+   set the height of btn "btn-horizontal" to 40
+   set the width of btn "btn-horizontal" to 40
+   set the loc of  btn "btn-horizontal" to 100,708
+   set the lockLoc of btn "btn-horizontal" to true
+   set the showName of btn "btn-horizontal" to false
+   set the opaque of btn "btn-horizontal" to false
+   set the threeD of btn "btn-horizontal" to false
+   set the icon of btn "btn-horizontal" to "horizontal.png"
+   set the showborder of btn "btn-horizontal" to false
+   set the borderWidth of  btn "btn-horizontal" to 0
+   set the layer of  btn "btn-horizontal" to 1
+   set the script of btn "btn-horizontal" to "global gHorizontal" & cr & "put 1 into gHorizontal" & cr & "on mouseUp" & cr & "   if gHorizontal = 0 then" & cr & "      horizontalSelected" & cr & "      horizontalPosition" & cr & "      expandToolbox" & cr & "      put 1 into lHorizontal"& cr & "   else if gHorizontal = 1 then" & cr & "      horizontalUnselected" & cr &"      retractToolbox" & cr & "      put 0 into gHorizontal" & cr & "   end if" & cr & "end mouseUp"
+   set the blendLevel of btn "btn-horizontal" to 0
+   set the visible of btn "btn-horizontal" to true
+
+   set the height of btn "btn-vertical" to 40
+   set the width of btn "btn-vertical" to 40
+   set the loc of  btn "btn-vertical" to 30,648
+   set the lockLoc of btn "btn-vertical" to true
+   set the showName of btn "btn-vertical" to false
+   set the opaque of btn "btn-vertical" to false
+   set the threeD of btn "btn-vertical" to false
+   set the icon of btn "btn-vertical" to "vertical.png"
+   set the showborder of btn "btn-vertical" to false
+   set the borderWidth of  btn "btn-vertical" to 0
+   set the layer of  btn "btn-vertical" to 1
+   set the script of btn "btn-vertical" to "global gVertical" & cr & "put 0 into gVertical" & cr & "on mouseUp" & cr & "   if gVertical = 0 then" & cr & "      verticalSelected" & cr & "      verticalPosition" & cr &"      expandToolbox" & cr & "      put 1 into gVertical"& cr & "   else if gVertical = 1 then" & cr & "      verticalUnselected" & cr &"      retractToolbox" & cr & "      put 0 into gVertical" & cr & "   end if" & cr & "end mouseUp"
+   set the blendLevel of btn "btn-vertical" to 0
+   set the visible of btn "btn-vertical" to true
+
+   #zone de dessin
+   set the loc of img "img-peinture" to 682,325
+   set the width of img "img-peinture" to 1000
+   set the height of img "img-peinture" to 500
+   put empty into img "img-peinture"
+   set the showBorder of img "img-peinture" to false
+   set the borderWidth of img "img-peinture" to 0
+   set the visible of img "img-peinture" to false
+  set the layer of img "img-peinture" to 2
+   set the script of img "img-peinture" to "on mouseLeave" & cr & "choose browse tool" & cr & "end mouseLeave"
+
+   put 1 into lctr
+   put 150 into xTools
+   repeat while lctr <=9
+      set the height of btn ("btn-outil" & lctr) to 40
+      set the height of btn ("btn-outil" & lctr) to 40
+      set the loc of btn ("btn-outil" & lctr) to xTools, 708
+      set the lockLoc of btn ("btn-outil" & lctr) to true
+      set the showName of btn ("btn-outil" & lctr) to false
+      set the opaque of btn ("btn-outil" & lctr) to false
+      set the threeD of btn ("btn-outil" & lctr) to false
+      set the showBorder of btn ("btn-outil" & lctr) to false
+      set the borderWidth of btn ("btn-outil" & lctr) to 0
+      set the layer of btn ("btn-outil" & lctr) to 1
+      add 1 to lctr
+      add 50 to xTools
+   end repeat
+   set the loc of btn "btn-outil11" to 600,708
+   set the loc of btn "btn-outil12" to 650,708
+   set the lockLoc of btn "btn-outil11" to true
+   set the lockLoc of btn "btn-outil12" to true
+   set the icon of btn "btn-outil1" to "pencil.png"
+   set the script of btn "btn-outil1" to "local lPencil" & cr & "put 0 into lPencil" & cr & "on mouseUp" & cr & "   hideInfobulle" & cr& "   if lPencil = 0 then" & cr & "      CrayonActif" & cr & "      put 1 into lPencil" & cr & "   else if lPencil = 1 then" & cr & "      crayonInactif" & cr & "      put 0 into lPencil" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(1)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil2" to "eraser.png"
+   set the script of btn "btn-outil2" to "local lEraser" & cr & "put 0 into lEraser" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "   if lEraser = 0 then" & cr & "      gommeActif" & cr & "      put 1 into lEraser" & cr & "   else if lEraser = 1 then" & cr & "      gommeInactif" & cr & "      put 0 into lEraser" & cr & "   end if " & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(2)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil3" to "highlighter.png"
+   set the script of btn "btn-outil3" to "local lHighlighter" & cr & " put 0 into lHighlighter" & cr &"on mouseUp" & cr & "    hideInfobulle" & cr & "   if lHighlighter = 0 then" & cr & "      surligneurActif" & cr & "      put 1 into lHighlighter" & cr & "   else if lHighlighter = 1 then" & cr & "      surligneurInactif" & cr & "  hideHighlighterPalette" & cr & "      put 0 into lHighlighter" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(3)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil4" to "line_2.png"
+   set the script of btn "btn-outil4" to "local lLine" & cr & "put 0 to lLine" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "   if lLine = 0 then" & cr & "      ligneActif" & cr & "put 1 into lLine" & cr & "    else if lLine = 1 then" & cr & "     ligneInactif" & cr & "      put 0 into lLine" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(4)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil5" to "clear.jpg"
+   set the script of btn "btn-outil5" to "on mouseUp" & cr & "    hideInfobulle" & cr & "   clearActif" & cr & "   answer " & quote & "Voulez-vous vraiment tout effacer?" &quote & "with " & quote & "Oui" & quote & " or " & quote & "Non" & quote & "" & cr & "   if it is " & quote & "Oui" & quote & " then" & cr & "      put empty into img " & quote & "img-peinture" & quote & "" & cr & "   end if" & cr & "   clearInactif" & cr & " end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(5)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil6" to "pointer.png"
+   set the script of btn "btn-outil6" to "local lPointer" & cr & "put 0 into lPointer" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "   if lPointer = 0 then" & cr & "      pointerActif" & cr & "      put 1 into lPointer" & cr & "   else if lPointer = 1 then" & cr & "      pointerInactif" & cr & "      put 0 into lPointer" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(6)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil7" to "window.png"
+   set the script of btn "btn-outil7" to "on mouseUp" & cr & "    hideInfobulle" & cr & "   windowActif"& cr & "   go to card " & quote & "page_supplementaire" & quote & "of stack " & quote & "fenetre" & quote & "" & cr & "end mouseUp"  & cr & "on mouseEnter" & cr & "switchInfobulle(7)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil8" to "formes_geometriques.png"
+   set the script of btn "btn-outil8" to "local lForm" & cr & "put 0 into lForm" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "   if lForm = 0 then"  & cr & "     formActif" & cr & "      put 1 into lForm" & cr & "   else if lForm = 1 then" & cr &  "      formInactif2" & cr & "      put 0 into lForm"  & cr & "  end if" & cr & "end mouseUp"  & cr & "on mouseEnter" & cr & "switchInfobulle(8)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil9" to "magnifier.jpg"
+   set the script of btn "btn-outil9" to "local lMagnifier" & cr & "put 0 = lMagnifier" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "   if lMagnifier = 0 then" & cr & "      zoomActif" & cr & "      put 1 into lMagnifier" & cr & "    else if lMagnifier = 1 then" & cr & "      zoomInactif" & cr & "      put 0 into lMagnifier" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(9)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil10" to "imprimante.jpg"
+   set the script of btn "btn-outil10" to "on mouseUp" & cr & "    hideInfobulle" & cr & "   createSnapshot" & cr & "end mouseUp"
+   set the icon of btn "btn-outil11" to "calculatrice.jpg"
+   set the script of btn "btn-outil11" to "local lCalculatrice" & cr & "put 0 into lCalculatrice" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "   if lCalculatrice = 0 then" & cr & "      calculatriceActif" & cr & "     put 1 into lCalculatrice" & cr & "   else if lCalculatrice = 1 then" & cr & "      calculatriceInactif" & cr & "      put 0 into lCalculatrice" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(11)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil12" to "keyboard.png"
+   set the script of btn "btn-outil12" to "local lKeyboard" & cr & "put 0 into lKeyboard" & cr & "on mouseUp" & cr & "    hideInfobulle" & cr & "if lKeyboard = 0 then" & cr & "   clavierActif" & cr & "  showAzeQwe" & cr & "   put 1 into lKeyboard" & cr & "else if lKeyboard = 1 then" & cr & "   clavierInactif" & cr & "   hideAzeQwe" & cr & "   put 0 into lKeyboard" & cr & "   hideKeyboard" & cr & "end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(12)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+
+   set the width of btn "btn-kb1" to 30
+   set the height of btn "btn-kb1" to 30
+   set the loc of btn "btn-kb1" to 695, 708
+   set the lockLoc of btn "btn-kb1" to true
+   set the backgroundColor of btn "btn-kb1" to "black"
+   set the textColor of btn "btn-kb1" to "white"
+   set the label of btn "btn-kb1" to "AZE"
+   set the layer of btn "btn-kb1" to 1
+   set the script of btn "btn-kb1" to "global gKeyboardType" & cr & "global gKeyboardArray" & cr & "on mouseUp" & cr & "  set the blendLevel of btn " & quote & "btn-kb1" & quote & " to 0" & cr & "  set the blendLevel of btn " & quote & "btn-kb2" & quote & " to 50" & cr & "   showKeyboard" & cr & "   put 2 into gKeyboardType" & cr & "   manageKeyboard" & cr & "end mouseUp"
+   set the blendLevel of btn "btn-kb1" to 0
+
+    set the width of btn "btn-kb2" to 30
+   set the height of btn "btn-kb2" to 30
+   set the loc of btn "btn-kb2" to 695, 668
+   set the lockLoc of btn "btn-kb2" to true
+   set the backgroundColor of btn "btn-kb2" to "black"
+   set the textColor of btn "btn-kb2" to "white"
+   set the label of btn "btn-kb2" to "QWE"
+   set the layer of btn "btn-kb2" to 1
+   set the script of btn "btn-kb2" to "global gKeyboardType" & cr & "global gKeyboardArray" & cr & "on mouseUp" & cr & "  set the blendLevel of btn " & quote & "btn-kb2" & quote & " to 0" & cr & "  set the blendLevel of btn " & quote & "btn-kb1" & quote & " to 50" & cr & "   showKeyboard" & cr & "   put 1 into gKeyboardType" & cr & "   manageKeyboard" & cr & "end mouseUp"
+    set the blendLevel of btn "btn-kb2" to 0
+
+   #positionnement des touches du clavier
+   put 1 into lctr
+   repeat while lctr <=76
+      set the width of btn ("btn-clavier" & lctr) to 15
+      set the height of btn ("btn-clavier" & lctr) to 15
+      set the backgroundColor of btn ("btn-clavier" & lctr) to "white"
+      set the textColor of btn ("btn-clavier" & lctr) to "black"
+      set the layer of btn ("btn-clavier" & lctr) to 1
+      set the threeD of btn ("btn-clavier" & lctr) to false
+      set borderWidth of btn ("btn-clavier" & lctr) to 1
+      set the lockLoc of btn ("btn-clavier" & lctr) to true
+      add 1 to lctr
+   end repeat
+
+   put 1 into lctr
+   put 720 into xKeyboard
+   repeat while lctr <= 12
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 628
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+   put 13 into lctr
+   put 730 into xKeyboard
+    repeat while lctr <= 25
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 648
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+   put 26 into lctr
+   put 740 into xKeyboard
+   repeat while lctr <= 36
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 668
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+   put 37 into lctr
+   put 750 into xKeyboard
+    repeat while lctr <= 46
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 688
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+   set the width on btn "btn-clavier73" to 50
+   set the loc of btn "btn-clavier73" to 975 ,628
+   set the label of btn "btn-clavier73" to "DLT"
+   set the script of btn "btn-clavier73" to "on mouseDown" & cr & "   put word 2 of selectedChunk of the selectedField into tSelectionStart" & cr & "    put word 4 of selectedChunk of the selectedField into tSelectionEnd" & cr & "   delete the char tSelectionStart of selectedField" & cr & "end mouseDown" & cr & "on mouseStillDown" & cr & "   put word 2 of selectedChunk of the selectedField into tSelectionStart" & cr & "   put word 4 of selectedChunk of the selectedField into tSelectionEnd" & cr & "   delete the char tSelectionStart of selectedField" & cr & "end mouseStillDown"
+   set the width of btn "btn-clavier74" to 50
+   set the loc of btn "btn-clavier74" to 1010 ,648
+   set the label of btn "btn-clavier74" to "BCKSPC"
+   set the script of btn "btn-clavier74" to "on mouseDown" & cr & "   put word 4 of selectedChunk of the selectedField into tSelectionStart" & cr & "    put word 2 of selectedChunk of the selectedField into tSelectionEnd" & cr & "   delete the char tSelectionStart of selectedField" & cr & "end mouseDown" & cr & "on mouseStillDown" & cr & "   put word 4 of selectedChunk of the selectedField into tSelectionStart" & cr & "   put word 2 of selectedChunk of the selectedField into tSelectionEnd" & cr & "   delete the char tSelectionStart of selectedField" & cr & "end mouseStillDown"
+   set the loc of btn "btn-clavier75" to 960, 668
+   set the width of btn "btn-clavier75" to 50
+   set the label of btn "btn-clavier75" to "SHIFT"
+   set the script of btn "btn-clavier75" to "global gKeyboardArray" & cr & "global gShiftEngaged" & cr & " global gKeyboardType" & cr & "put 0 into gShiftEngaged" & cr & "on mouseUp" & cr & "  keyboardSwitch" & cr & "end mouseUp"
+   set the width of btn "btn-clavier76" to 150
+   set the loc of btn "btn-clavier76" to 830, 708
+   set the label of btn "btn-clavier76" to " "
+   #set the script of btn "btn-clavier76" to "on mouseDown" & cr & "   put the label of me after field" & quote & "fld-clavier" & quote & "" & cr & "end mouseDown" & cr & "on mouseStillDown" & cr & "   put the label of me after field" & quote & "fld-clavier" & quote & "" & cr & "end mouseStillDown"
+   set the script of btn "btn-clavier76" to "global gField" & cr & "on mouseDown" & cr & "   if gField = 1 then" & cr & "       put the label of me after field " & quote  & "fld-clavier" & quote  & "" & cr & "   else if gField = 2 then" & cr & "       put the label of me after field " & quote  & "fld-clavier2" & quote &"" & cr & "  end if" & cr & "end mouseDown"
+
+   put 47 into lctr
+   put 1050 into xKeyboard
+   repeat while lctr <= 52
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 628
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+
+   put 53 into lctr
+   put 1050 into xKeyboard
+   repeat while lctr <= 58
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 648
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+
+    put 59 into lctr
+   put 1050 into xKeyboard
+   repeat while lctr <= 64
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 668
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+
+    put 65 into lctr
+   put 1050 into xKeyboard
+   repeat while lctr <= 70
+      set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 688
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+
+    put 71 into lctr
+   put 1050 into xKeyboard
+   repeat while lctr <= 72
+     set the loc of btn ("btn-clavier" & lctr) to xKeyboard, 708
+      add 1 to lctr
+      add 20 to xKeyboard
+   end repeat
+   set the width of fld "fld-clavier" to 400
+   set the height of fld "fld-clavier" to 25
+   set the loc of fld "fld-clavier" to 920, 600
+   set the lockLoc of fld "fld-clavier" to false
+   set the layer of fld "fld-clavier" to top
+   put empty into fld "fld-clavier"
+   set the lockText of fld "fld-clavier" to false
+   set the textAlign of fld "fld-clavier" to "center"
+   focus fld "fld-clavier"
+   set the script of fld "fld-clavier" to "global gField" & cr & "on mouseEnter" & cr & "   put 1 into gField" & cr & "end mouseEnter"
+   set the width of fld "fld-clavier2" to 400
+   set the height of fld "fld-clavier2" to 25
+   set the loc of fld "fld-clavier2" to 920,570
+   set the lockLoc of fld "fld-clavier2" to false
+   set the layer of fld "fld-clavier2" to top
+   put empty into fld "fld-clavier2"
+   set the lockText of fld "fld-clavier2" to false
+   set the textAlign of fld "fld-clavier2" to "center"
+   set the script of fld "fld-clavier2" to "global gField" & cr & "on mouseEnter" & cr & "   put 2 into gField" & cr & "end mouseEnter"
+   set the width of btn "btn-clavier" to 25
+   set the height of btn "btn-clavier" to 25
+   set the showName of btn "btn-clavier" to false
+   set the threeD of btn "btn-clavier" to false
+   set the loc of btn "btn-clavier" to 1135,600
+   set the script of btn "btn-clavier" to "on mouseDown" & cr & "   grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   moveKeyboard" & cr & "end mouseUp"
+   set the width of btn "btn-keyvier" to 25
+   set the height of btn "btn-keyvier" to 25
+   set the showName of btn "btn-keyvier" to false
+   set the threeD of btn "btn-keyvier" to false
+   set the loc of btn "btn-keyvier" to 1135,570
+   set the script of btn "btn-keyvier" to "on mouseDown" & cr & "   grab me" & cr & "end mouseDown" & cr & " on mouseUp" & cr & "   moveKeyvier" & cr & "end mouseUp"
+   put 1 into lctr
+   repeat while lctr <= 72
+      #set the script of btn ("btn-clavier" & lctr) to "on mouseDown" & cr & "put the label of me after field" & quote & "fld-clavier" & quote & "" & cr & "end mouseDown" & cr & "on mouseStillDown" & cr & "put the label of me after field" & quote & "fld-clavier" & quote & "" & cr & "end mouseStillDown"
+      set the script of btn ("btn-clavier" & lctr) to "global gField" & cr & "on mouseDown" & cr & "   if gField = 1 then" & cr & "       put the label of me after field " & quote  & "fld-clavier" & quote  & "" & cr & "   else if gField = 2 then" & cr & "       put the label of me after field " & quote  & "fld-clavier2" & quote &"" & cr & "  end if" & cr & "end mouseDown"      add 1 to lctr
+   end repeat
+
+   #outil de dessin main libre
+   put 1 into lctr
+   put 130 into xPencil
+   repeat while lctr <= 3
+      set the width of btn ("btn-crayon" & lctr) to 15
+      set the height of btn ("btn-crayon" & lctr) to 15
+      set the threeD of btn ("btn-crayon" & lctr) to false
+      set the showBorder of btn ("btn-crayon" & lctr) to false
+      set the showName of btn ("btn-crayon" & lctr) to false
+      set the borderWidth of btn ("btn-crayon" & lctr) to 0
+      set the layer of btn ("btn-crayon" & lctr) to 1
+      set the lockLoc of btn ("btn-crayon" & lctr) to true
+      set the loc of btn ("btn-crayon" & lctr) to xPencil, 680
+      set the opaque of btn ("btn-crayon" & lctr) to false
+      add 20 to xPencil
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-crayon1" to "3X3.png"
+   set the script of btn "btn-crayon1" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-crayon1" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-crayon2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon3" & quote &" to 50" & cr & "   showCrayonPalette" & cr & "   set the brush to 1069" & cr & "end mouseUp"
+   set the icon of btn "btn-crayon2" to "8X8.png"
+    set the script of btn "btn-crayon2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-crayon2" & quote & " to 0" & cr &  "   set the blendLevel of btn " & quote & "btn-crayon1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon3" & quote &" to 50" & cr & "   showCrayonPalette" & cr & "   set the brush to 1071" & cr & "end mouseUp"
+    set the icon of btn "btn-crayon3" to "10X10.png"
+     set the script of btn "btn-crayon3" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-crayon3" & quote & " to 0" & cr &  "   set the blendLevel of btn " & quote & "btn-crayon2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon1" & quote &" to 50" & cr &"   showCrayonPalette" & cr & "   set the brush to 1076" & cr & "end mouseUp"
+   # la palette de couleur
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the threeD of btn ("btn-crayon-couleur" & lctr) to false
+      set the showName of btn ("btn-crayon-couleur" & lctr) to false
+      set the showBorder of btn ("btn-crayon-couleur" & lctr) to false
+      set the opaque of btn ("btn-crayon-couleur" & lctr) to true
+      set the borderWidth of btn ("btn-crayon-couleur" & lctr) to 0
+      set the width of btn ("btn-crayon-couleur" & lctr) to 15
+      set the height of btn ("btn-crayon-couleur" & lctr) to 15
+      set the lockLoc of btn ("btn-crayon-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-crayon-couleur1" to 120, 660
+   set the loc of btn "btn-crayon-couleur2" to 140, 660
+   set the loc of btn "btn-crayon-couleur3" to 160, 660
+   set the loc of btn "btn-crayon-couleur4" to 180, 660
+   set the backgroundColor of btn "btn-crayon-couleur1" to 0,0,0
+   set the script of  btn "btn-crayon-couleur1" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 0,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur2" to 105,105,105
+   set the script of  btn "btn-crayon-couleur2" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 105,105,105" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur3" to 190,190,190
+   set the script of  btn "btn-crayon-couleur3" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 190,190,190" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur4" to 255,255,255
+   set the showBorder of btn "btn-crayon-couleur4" to true
+   set borderWidth of btn "btn-crayon-couleur4" to 2
+   set the script of  btn "btn-crayon-couleur4" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,255,255" & cr & "end mouseUp"
+   set the loc of btn "btn-crayon-couleur5" to 120, 640
+   set the loc of btn "btn-crayon-couleur6" to 140, 640
+   set the loc of btn "btn-crayon-couleur7" to 160, 640
+   set the loc of btn "btn-crayon-couleur8" to 180, 640
+   set the backgroundColor of btn "btn-crayon-couleur5" to 255,0,0
+   set the script of  btn "btn-crayon-couleur5" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur6" to 255,20,147
+   set the script of  btn "btn-crayon-couleur6" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,20,147" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur7" to 255,165,0
+   set the script of  btn "btn-crayon-couleur7" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,165,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur8" to 255,255,0
+   set the script of  btn "btn-crayon-couleur8" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,255,0" & cr & "end mouseUp"
+   set the loc of btn "btn-crayon-couleur9" to 120, 620
+   set the loc of btn "btn-crayon-couleur10" to 140, 620
+   set the loc of btn "btn-crayon-couleur11" to 160, 620
+   set the loc of btn "btn-crayon-couleur12" to 180, 620
+   set the backgroundColor of btn "btn-crayon-couleur9" to 238,130,238
+   set the script of  btn "btn-crayon-couleur9" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 238,130,238" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur10" to 75,0,130
+   set the script of  btn "btn-crayon-couleur10" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 75,0,130" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur11" to 0,0,255
+   set the script of  btn "btn-crayon-couleur11" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 0,0,255" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur12" to 173,216,230
+   set the script of  btn "btn-crayon-couleur12" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 173,216,230" & cr & "end mouseUp"
+   set the loc of btn "btn-crayon-couleur13" to 120, 600
+   set the loc of btn "btn-crayon-couleur14" to 140, 600
+   set the loc of btn "btn-crayon-couleur15" to 160, 600
+   set the loc of btn "btn-crayon-couleur16" to 180, 600
+   set the backgroundColor of btn "btn-crayon-couleur13" to 0,100,0
+   set the script of  btn "btn-crayon-couleur13" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 0,100,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur14" to 124,252,0
+   set the script of  btn "btn-crayon-couleur14" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 124,252,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur15" to 139,69,19
+   set the script of  btn "btn-crayon-couleur15" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 139,69,19" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur16" to 244,164,96
+   set the script of  btn "btn-crayon-couleur16" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 244,164,96" & cr & "end mouseUp"
+
+   #le pointeur
+   set the height of btn "btn-pointeur" to 40
+   set the width of btn "btn-pointeur" to 40
+   set the loc of btn "btn-pointeur" to 682,384
+   set the opaque of btn "btn-pointeur" to false
+   set the threeD of btn "btn-pointeur" to false
+   set the showBorder of btn "btn-pointeur" to false
+   set the borderWidth of btn "btn-pointeur" to 0
+   set the showName of btn "btn-pointeur" to false
+   set the icon of btn "btn-pointeur" to "pointer.png"
+   set the script of btn "btn-pointeur" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown"
+
+   put 1 into lctr
+   put 680 into yEraser
+   repeat while lctr <= 3
+      set the width of btn ("btn-gomme" & lctr) to 20
+      set the height of btn ("btn-gomme" & lctr) to 20
+      set threeD of btn ("btn-gomme" & lctr) to false
+      set showBorder of btn ("btn-gomme" & lctr) to false
+      set the borderWidth of btn ("btn-gomme" & lctr) to 0
+      set the showName of btn ("btn-gomme" & lctr) to false
+      set the lockLoc of btn ("btn-gomme" & lctr) to true
+      set the loc of btn ("btn-gomme" & lctr) to 200, yEraser
+      set the layer of btn ("btn-gomme" & lctr) to 1
+      add 1 to lctr
+      add -20 to yEraser
+   end repeat
+   set the icon of btn "btn-gomme1" to "5X5.png"
+   set the script of btn "btn-gomme1" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-gomme1" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-gomme2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme3" & quote & " to 50" & cr & "   choose the eraser tool" & cr & "   set the eraser to 1065" & cr & "end mouseUp"
+   set the icon of btn "btn-gomme2" to "10X10.png"
+   set the script of btn "btn-gomme2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-gomme1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme2" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-gomme3" & quote & " to 50" & cr & "   choose the eraser tool" & cr & "   set the eraser to 1067" & cr & "end mouseUp"
+   set the icon of btn "btn-gomme3" to "15X15.png"
+   set the script of btn "btn-gomme3" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-gomme1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme2" & quote & " to 50" & cr &"   set the blendLevel of btn " & quote & "btn-gomme3" & quote & " to 0" & cr &"   choose the eraser tool" & cr & "   set the eraser to 1068" & cr & "end mouseUp"
+
+   #outil surligneur
+   put 1 into lctr
+   put 235 into xHighlighter
+   repeat while lctr <= 2
+      set the width of btn ("btn-surligneur" & lctr) to 18
+      set the height of btn ("btn-surligneur" & lctr) to 18
+      set the threeD of btn ("btn-surligneur" & lctr) to false
+      set the showBorder of btn ("btn-surligneur" & lctr) to false
+      set the borderWidth of btn ("btn-surligneur" & lctr) to 0
+      set the showName of btn ("btn-surligneur" & lctr) to false
+      set the lockLoc of btn ("btn-surligneur" & lctr) to true
+      set the loc of btn ("btn-surligneur" & lctr) to xHighlighter, 680
+      set the layer of btn ("btn-surligneur" & lctr) to 1
+      add 1 to lctr
+      add 20 to xHighlighter
+   end repeat
+   set the icon of btn "btn-surligneur1" to "10X10.png"
+   set the script of btn "btn-surligneur1" to "on mouseUp" & cr & "  set the blendLevel of btn " & quote & "btn-surligneur1" & quote & " to 0" & cr & "  set the blendLevel of btn " & quote & "btn-surligneur2" & quote & " to 50" & cr & "  set the brush to 1076" & cr & "   showHighlighterPalette" & cr & "end mouseUp"
+   set the icon of btn "btn-surligneur2" to "15X15.png"
+   set the script of btn "btn-surligneur2" to "on mouseUp" & cr & "  set the blendLevel of btn " & quote & "btn-surligneur1" & quote & " to 50" & cr & "  set the blendLevel of btn " & quote & "btn-surligneur2" & quote & " to 0" & cr & "  set the brush to 1072" & cr & "   showHighlighterPalette" & cr & "end mouseUp"
+
+   put 1 into lctr
+   put 660 into yHighlighter
+   repeat while lctr <= 4
+      set the height of btn ("btn-surligneur-couleur" & lctr) to 15
+      set the width of btn ("btn-surligneur-couleur" & lctr)  to 15
+      set the opaque of btn ("btn-surligneur-couleur" & lctr)  to true
+      set the threeD of btn ("btn-surligneur-couleur" & lctr)  to false
+      set the showBorder of btn ("btn-surligneur-couleur" & lctr) to false
+      set the showName of btn ("btn-surligneur-couleur" & lctr) to false
+      set the borderWidth of btn ("btn-surligneur-couleur" & lctr) to 0
+      set the lockLoc of btn ("btn-surligneur-couleur" & lctr) to true
+      set the layer of btn ("btn-surligneur-couleur" & lctr) to 1
+      set the loc of btn ("btn-surligneur-couleur" & lctr) to 250, yHighlighter
+      add 1 to lctr
+      add -20 to yHighlighter
+   end repeat
+   set the backgroundColor of btn "btn-surligneur-couleur1" to 255,215,0
+   set the script of btn "btn-surligneur-couleur1" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 255,215,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-surligneur-couleur2" to 173,255,47
+   set the script of btn "btn-surligneur-couleur2" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 173,255,47" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-surligneur-couleur3" to 0,255,255
+   set the script of btn "btn-surligneur-couleur3" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 0,255,255" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-surligneur-couleur4" to 255,105,180
+   set the script of btn "btn-surligneur-couleur4" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 255,105,180" & cr & "end mouseUp"
+
+   #outil lignes
+   put 1 into lctr
+   put 280 into xLine
+   repeat while lctr <= 3
+      set the height of btn ("btn-ligne" & lctr) to 15
+      set the width of btn ("btn-ligne" & lctr) to 15
+      set the opaque of btn ("btn-ligne" & lctr) to false
+      set the threeD of btn ("btn-ligne" & lctr) to false
+      set the showName of btn ("btn-ligne" & lctr) to false
+      set the showBorder of btn ("btn-ligne" & lctr) to false
+      set the borderWidth of btn ("btn-ligne" & lctr) to 0
+      set the layer of btn ("btn-ligne" & lctr) to 1
+      set the lockLoc of btn ("btn-ligne" & lctr) to true
+      set the loc of btn ("btn-ligne" & lctr) to xLine, 680
+      add 1 to lctr
+      add 20 to xLine
+   end repeat
+   set the icon of btn "btn-ligne1" to "5X5.png"
+   set the script of btn "btn-ligne1" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-ligne1" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-ligne2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne3" & quote & " to 50" & cr & "   set the lineSize to 3" & cr & "  showLinePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-ligne2" to "8X8.png"
+   set the script of btn "btn-ligne2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-ligne1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne2" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-ligne3" & quote & " to 50" & cr & "   set the lineSize to 8" & cr & "  showLinePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-ligne3" to "10X10.png"
+   set the script of btn "btn-ligne3" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-ligne1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne3" & quote & " to 0" & cr & "   set the lineSize to 10" & cr & "  showLinePalette" & cr & "end mouseUp"
+     # la palette de couleur
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the threeD of btn ("btn-ligne-couleur" & lctr) to false
+      set the showName of btn ("btn-ligne-couleur" & lctr) to false
+      set the showBorder of btn ("btn-ligne-couleur" & lctr) to false
+      set the opaque of btn ("btn-ligne-couleur" & lctr) to true
+      set the borderWidth of btn ("btn-ligne-couleur" & lctr) to 0
+      set the width of btn ("btn-ligne-couleur" & lctr) to 15
+      set the height of btn ("btn-ligne-couleur" & lctr) to 15
+      set the lockLoc of btn ("btn-ligne-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-ligne-couleur1" to 280, 660
+   set the loc of btn "btn-ligne-couleur2" to 300, 660
+   set the loc of btn "btn-ligne-couleur3" to 320, 660
+   set the loc of btn "btn-ligne-couleur4" to 340, 660
+   set the backgroundColor of btn "btn-ligne-couleur1" to 0,0,0
+   set the script of btn "btn-ligne-couleur1" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 0,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur2" to 105,105,105
+   set the script of btn "btn-ligne-couleur2" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 105,105,105" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur3" to 190,190,190
+   set the script of btn "btn-ligne-couleur3" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 190,190,190" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur4" to 255,255,255
+   set the showBorder of btn "btn-ligne-couleur4" to true
+   set borderWidth of btn "btn-ligne-couleur4" to 2
+   set the script of btn "btn-ligne-couleur4" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,255,255" & cr & "end mouseUp"
+   set the loc of btn "btn-ligne-couleur5" to 280, 640
+   set the loc of btn "btn-ligne-couleur6" to 300, 640
+   set the loc of btn "btn-ligne-couleur7" to 320, 640
+   set the loc of btn "btn-ligne-couleur8" to 340, 640
+   set the backgroundColor of btn "btn-ligne-couleur5" to 255,0,0
+   set the script of btn "btn-ligne-couleur5" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur6" to 255,20,147
+   set the script of btn "btn-ligne-couleur6" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,20,147" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur7" to 255,165,0
+   set the script of btn "btn-ligne-couleur7" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,165,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur8" to 255,255,0
+   set the script of btn "btn-ligne-couleur8" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,255,0" & cr & "end mouseUp"
+   set the loc of btn "btn-ligne-couleur9" to 280, 620
+   set the loc of btn "btn-ligne-couleur10" to 300, 620
+   set the loc of btn "btn-ligne-couleur11" to 320, 620
+   set the loc of btn "btn-ligne-couleur12" to 340, 620
+   set the backgroundColor of btn "btn-ligne-couleur9" to 238,130,238
+   set the script of btn "btn-ligne-couleur9" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 238,130,238" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur10" to 75,0,130
+   set the script of btn "btn-ligne-couleur10" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 75,0,130" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur11" to 0,0,255
+   set the script of btn "btn-ligne-couleur11" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 0,0,255" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur12" to 173,216,230
+   set the script of btn "btn-ligne-couleur12" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 173,216,230" & cr & "end mouseUp"
+   set the loc of btn "btn-ligne-couleur13" to 280, 600
+   set the loc of btn "btn-ligne-couleur14" to 300, 600
+   set the loc of btn "btn-ligne-couleur15" to 320, 600
+   set the loc of btn "btn-ligne-couleur16" to 340, 600
+   set the backgroundColor of btn "btn-ligne-couleur13" to 0,100,0
+   set the script of btn "btn-ligne-couleur13" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 0,100,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur14" to 124,252,0
+   set the script of btn "btn-ligne-couleur14" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 124,252,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur15" to 139,69,19
+   set the script of btn "btn-ligne-couleur15" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 139,69,19" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur16" to 244,164,96
+   set the script of btn "btn-ligne-couleur16" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 244,164,96" & cr & "end mouseUp"
+
+   #formes
+   put 1 into lctr
+   put 460 into xForms
+   repeat while lctr <= 4
+      set the height of btn ("btn-formes" & lctr) to 20
+      set the width of btn ("btn-formes" & lctr) to 20
+      set the opaque of btn ("btn-formes" & lctr) to false
+      set the threeD of btn ("btn-formes" & lctr) to false
+      set the showName of btn ("btn-formes" & lctr) to false
+      set the borderWidth of btn ("btn-formes" & lctr) to 0
+      set the showBorder of btn ("btn-formes" & lctr) to false
+      set the lockLoc of btn ("btn-formes" & lctr) to true
+      set the layer of btn ("btn-formes" & lctr) to 1
+      set the loc of btn ("btn-formes" & lctr) to xForms, 670
+      add 1 to lctr
+      add 25 to xForms
+   end repeat
+   set the icon of btn "btn-formes1" to "circle.png"
+   set the script of btn "btn-formes1" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 0" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 50" & cr & "   put 1 into gForms" & cr &  "   showFormePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-formes2" to "rectangle.png"
+   set the script of btn "btn-formes2" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 0" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 50" & cr & "   put 2 into gForms" & cr &  "   showFormePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-formes3" to "square.png"
+   set the script of btn "btn-formes3" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 0" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 50" & cr & "   put 3 into gForms" & cr & "   showFormePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-formes4" to "triangle.png"
+   set the script of btn "btn-formes4" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 0" & cr & "   put 4 into gForms" & cr & "   showFormePalette" & cr & "end mouseUp"
+    # la palette de couleur
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the threeD of btn ("btn-formes-couleur" & lctr) to false
+      set the showName of btn ("btn-formes-couleur" & lctr) to false
+      set the showBorder of btn ("btn-formes-couleur" & lctr) to false
+      set the opaque of btn ("btn-formes-couleur" & lctr) to true
+      set the borderWidth of btn ("btn-formes-couleur" & lctr) to 0
+      set the width of btn ("btn-formes-couleur" & lctr) to 15
+      set the height of btn ("btn-formes-couleur" & lctr) to 15
+      set the lockLoc of btn ("btn-formes-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-formes-couleur1" to 470,650
+   set the loc of btn "btn-formes-couleur2" to 490,650
+   set the loc of btn "btn-formes-couleur3" to 510,650
+   set the loc of btn "btn-formes-couleur4" to 530,650
+   set the backgroundColor of btn "btn-formes-couleur1" to 0,0,0
+   set the script of btn "btn-formes-couleur1" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 1 into gFormColor" & cr &  "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur2" to 105,105,105
+    set the script of btn "btn-formes-couleur2" to "global gForms, gFormColor" & cr &"on mouseUp" & cr &  "put 2 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+    set the backgroundColor of btn "btn-formes-couleur3" to 190,190,190
+    set the script of btn "btn-formes-couleur3" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 3 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+    set the backgroundColor of btn "btn-formes-couleur4" to 255,255,255
+    set the script of btn "btn-formes-couleur4" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 4 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the showBorder of btn "btn-formes-couleur4" to true
+   set borderWidth of btn "btn-formes-couleur4" to 2
+   set the loc of btn "btn-formes-couleur5" to 470,630
+   set the loc of btn "btn-formes-couleur6" to 490,630
+   set the loc of btn "btn-formes-couleur7" to 510,630
+   set the loc of btn "btn-formes-couleur8" to 530,630
+   set the backgroundColor of btn "btn-formes-couleur5" to 255,0,0
+   set the script of btn "btn-formes-couleur5" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 5 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur6" to 255,20,147
+   set the script of btn "btn-formes-couleur6" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 6 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur7" to 255,165,0
+   set the script of btn "btn-formes-couleur7" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 7 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur8" to 255,255,0
+   set the script of btn "btn-formes-couleur8" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 8 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the loc of btn "btn-formes-couleur9" to 470,610
+   set the loc of btn "btn-formes-couleur10" to 490,610
+   set the loc of btn "btn-formes-couleur11" to 510,610
+   set the loc of btn "btn-formes-couleur12" to 530,610
+   set the backgroundColor of btn "btn-formes-couleur9" to 238,130,238
+   set the script of btn "btn-formes-couleur9" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 9 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur10" to 75,0,130
+   set the script of btn "btn-formes-couleur10" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 10 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur11" to 0,0,255
+   set the script of btn "btn-formes-couleur11" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 11 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur12" to 173,216,230
+   set the script of btn "btn-formes-couleur12" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 12 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the loc of btn "btn-formes-couleur13" to 470,590
+   set the loc of btn "btn-formes-couleur14" to 490,590
+   set the loc of btn "btn-formes-couleur15" to 510,590
+   set the loc of btn "btn-formes-couleur16" to 530,590
+   set the backgroundColor of btn "btn-formes-couleur13" to 0,100,0
+   set the script of btn "btn-formes-couleur13" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 13 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur14" to 124,252,0
+   set the script of btn "btn-formes-couleur14" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 14 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur15" to 139,69,19
+   set the script of btn "btn-formes-couleur15" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 15 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur16" to 244,164,96
+   set the script of btn "btn-formes-couleur16" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 16 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+
+   #zoom
+   put 1 into lctr
+   put 670 into yZoom
+   repeat while lctr <= 2
+      set the width of btn ("btn-zoom" & lctr) to 40
+      set the height of btn ("btn-zoom" & lctr) to 40
+      set the threeD of btn ("btn-zoom" & lctr) to false
+      set the opaque of btn ("btn-zoom" & lctr) to false
+      set the showName of btn ("btn-zoom" & lctr) to false
+      set the showBorder of btn ("btn-zoom" & lctr) to false
+      set the borderWidth of btn ("btn-zoom" & lctr) to 0
+      set the layer of btn ("btn-zoom" & lctr) to 1
+      set the lockLoc of btn ("btn-zoom" & lctr) to true
+      set the loc of btn ("btn-zoom" & lctr) to 550, yZoom
+      add 1 to lctr
+      add -45 to yZoom
+   end repeat
+   set the icon of btn "btn-zoom1" to "zoom_in.png"
+   set the icon of btn "btn-zoom2" to "zoom_out.jpg"
+   set the script of btn "btn-zoom1" to "on mouseUp" & cr & "   zoomIn" & cr & "end mouseUp"
+   set the script of btn "btn-zoom2" to "on mouseUp" & cr & "   zoomOut" & cr & "end mouseUp"
+
+   #la calculatrice
+   put 1 into lctr
+   repeat while lctr <= 20
+      set the width of btn ("btn-calc" & lctr) to 20
+      set the height of btn ("btn-calc" & lctr) to 20
+      set the lockLoc of btn ("btn-calc" & lctr) to true
+      set the showBorder of btn ("btn-calc" & lctr) to false
+      set the borderWidth of btn ("btn-calc" & lctr) to 0
+      set the threeD of btn ("btn-calc" & lctr) to false
+      set the opaque of btn ("btn-calc" & lctr) to true
+      set the backgroundColor of btn ("btn-calc" & lctr) to "black"
+      set the textColor of btn ("btn-calc" & lctr) to "white"
+      add 1 to lctr
+   end repeat
+   set the width of fld "fld-calculatrice" to 90
+   set the height of fld "fld-calculatrice" to 20
+   set the lockLoc of fld "fld-calculatrice" to true
+   focus fld "fld-calculatrice"
+   set the loc of btn "btn-calc1" to 560,670
+   set the label of btn "btn-calc1" to "±"
+   set the script of btn "btn-calc1" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "  togglePressed" & cr & "end mouseUp"
+   set the loc of btn "btn-calc2" to 582,670
+   set the label of btn "btn-calc2" to "0"
+   set the script of btn "btn-calc2" to "on mouseUp" & cr & "   calculatorNumbers(0)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc3" to 604,670
+   set the label of btn "btn-calc3" to "."
+   set the script of btn "btn-calc3" to "on mouseUp" & cr & "   put the label of me after fld " & quote & "fld-calculatrice" & quote & "" & cr & "end mouseUp"
+   set the loc of btn "btn-calc4" to 626,670
+   set the label of btn "btn-calc4" to "="
+   set the script of btn "btn-calc4" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   equalPressed" & cr & "end mouseUp"
+   set the loc of btn "btn-calc5" to 560,648
+   set the label of btn "btn-calc5" to "1"
+   set the script of btn "btn-calc5" to "on mouseUp" & cr & "  calculatorNumbers(1)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc6" to 582,648
+   set the label of btn "btn-calc6" to "2"
+   set the script of btn "btn-calc6" to "on mouseUp" & cr & "  calculatorNumbers(2)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc7" to 604,648
+   set the label of btn "btn-calc7" to "3"
+   set the script of btn "btn-calc7" to "on mouseUp" & cr & "   calculatorNumbers(3)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc8" to 626,648
+   set the label of btn "btn-calc8" to "+"
+   set the script of btn "btn-calc8" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "+" & quote & ")" & cr & "end mouseUp"
+   set the loc of btn "btn-calc9" to 560,626
+   set the label of btn "btn-calc9" to "4"
+   set the script of btn "btn-calc9" to "on mouseUp" & cr & "   calculatorNumbers(4)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc10" to 582,626
+   set the label of btn "btn-calc10" to "5"
+   set the script of btn "btn-calc10" to "on mouseUp" & cr & "   calculatorNumbers(5)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc11" to 604,626
+   set the label of btn "btn-calc11" to "6"
+   set the script of btn "btn-calc11" to "on mouseUp" & cr & "   calculatorNumbers(6)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc12" to 626,626
+   set the label of btn "btn-calc12" to "-"
+   set the script of btn "btn-calc12" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "-" & quote & ")" & cr & "end mouseUp"
+   set the loc of btn "btn-calc13" to 560,604
+   set the label of btn "btn-calc13" to "7"
+   set the script of btn "btn-calc13" to "on mouseUp" & cr & "   calculatorNumbers(7)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc14" to 582,604
+   set the label of btn "btn-calc14" to "8"
+   set the script of btn "btn-calc14" to "on mouseUp" & cr & "   calculatorNumbers(8)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc15" to 604,604
+   set the label of btn "btn-calc15" to "9"
+   set the script of btn "btn-calc15" to "on mouseUp" & cr & "   calculatorNumbers(9)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc16" to 626,604
+   set the label of btn "btn-calc16" to "*"
+   set the script of btn "btn-calc16" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "*" & quote & ")" & cr & "end mouseUp"
+   set the loc of btn "btn-calc17" to 560,582
+   set the label of btn "btn-calc17" to "C"
+   set the script of btn "btn-calc17" to "on mouseUp" & cr & "   put the 0 into fld " & quote & "fld-calculatrice" & quote & "" & cr & "end mouseUp"
+   set the loc of btn "btn-calc18" to 582,582
+   set the label of btn "btn-calc18" to "%"
+   set the script of btn "btn-calc18" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   percentagePressed" & cr &"end mouseUp"
+   set the loc of btn "btn-calc19" to 604,582
+   set the label of btn "btn-calc19" to "²"
+   set the script of btn "btn-calc19" to "on mouseUp" & cr & "   put the text of fld " & quote & "fld-calculatrice" & quote & " into tCurrentValue" & cr & "put tCurrentValue*tCurrentValue into fld " & quote & "fld-calculatrice" & quote & cr & "end mouseUp"
+   set the loc of btn "btn-calc20" to 626,582
+   set the label of btn "btn-calc20" to "/"
+   set the script of btn "btn-calc20" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "/" & quote & ")" & cr & "end mouseUp"
+   set the loc of fld "fld-calculatrice" to 593,560
+   set the textAlign of fld "fld-calculatrice" to "right"
+   set the text of fld "fld-calculatrice" to 0
+
+   #setup of the buttons for resizing the forms
+   set the showName of btn "btn-cadre-circle" to false
+   set the showBorder of btn "btn-cadre-circle" to false
+   set the borderWidth of btn "btn-cadre-circle" to 0
+   set the visible of btn "btn-cadre-circle" to false
+   set the showName of btn "btn-cadre-rectangle" to false
+   set the showBorder of btn "btn-cadre-rectangle" to false
+   set the borderWidth of btn "btn-cadre-rectangle" to 0
+   set the visible of btn "btn-cadre-rectangle" to false
+   set the showName of btn "btn-cadre-square" to false
+   set the showBorder of btn "btn-cadre-square" to false
+   set the borderWidth of btn "btn-cadre-square" to 0
+   set the visible of btn "btn-cadre-square" to false
+   set the showName of btn "btn-cadre-triangle" to false
+   set the showBorder of btn "btn-cadre-triangle" to false
+   set the borderWidth of btn "btn-cadre-triangle" to 0
+   set the visible of btn "btn-cadre-triangle" to false
+   set the showName of btn "btn-curseur-circle" to false
+   set the showBorder of btn "btn-curseur-circle" to false
+   set the borderWidth of btn "btn-curseur-circle" to 0
+   set the backgroundColor of btn "btn-curseur-circle" to "black"
+   set the threeD of btn "btn-curseur-circle" to false
+   set the height of btn "btn-curseur-circle" to 6
+   set the width of btn "btn-curseur-circle" to 6
+   set the showName of btn "btn-curseur-rectangle" to false
+   set the showBorder of btn "btn-curseur-rectangle" to false
+   set the borderWidth of btn "btn-curseur-rectangle" to 0
+   set the backgroundColor of btn "btn-curseur-rectangle" to "black"
+   set the threeD of btn "btn-curseur-rectangle" to false
+   set the height of btn "btn-curseur-rectangle" to 6
+   set the width of btn "btn-curseur-rectangle" to 6
+   set the showName of btn "btn-curseur-square" to false
+   set the showBorder of btn "btn-curseur-square" to false
+   set the borderWidth of btn "btn-curseur-square" to 0
+   set the backgroundColor of btn "btn-curseur-square" to "black"
+   set the threeD of btn "btn-curseur-square" to false
+   set the height of btn "btn-curseur-square" to 6
+   set the width of btn "btn-curseur-square" to 6
+   set the showName of btn "btn-curseur-triangle" to false
+   set the showBorder of btn "btn-curseur-triangle" to false
+   set the borderWidth of btn "btn-curseur-triangle" to 0
+   set the backgroundColor of btn "btn-curseur-triangle" to "black"
+   set the threeD of btn "btn-curseur-triangle" to false
+   set the height of btn "btn-curseur-triangle" to 6
+   set the width of btn "btn-curseur-triangle" to 6
+   set the visible of btn "btn-curseur-circle" to false
+   set the visible of btn "btn-curseur-rectangle" to false
+   set the visible of btn "btn-curseur-square" to false
+   set the visible of btn "btn-curseur-triangle" to false
+   set the margins of fld "infobulle" to 6
+      set the width of fld "infobulle" to 135
+      set the height of  fld "infobulle" to 75
+      set the textAlign of fld "infobulle" to "left"
+      set the blendLevel of fld "infobulle" to 35
+end setupToolbar
+
+command hideToolbar
+ #  set the visible of btn "btn-horizontal" to false
+  # set the visible of btn "btn-vertical" to false
+   put 1 into lctr
+   repeat while lctr <=12
+      set the visible of btn ("btn-outil" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set the visible of btn "btn-kb1" to false
+   set the visible of btn "btn-kb2" to false
+   put 1 into lctr
+   repeat while lctr <= 76
+      set the visible of btn ("btn-clavier" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set the visible of fld "fld-clavier" to false
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the visible of btn ("btn-crayon-couleur" & lctr) to false
+      set the visible of btn ("btn-ligne-couleur" & lctr) to false
+      set the visible of btn ("btn-formes-couleur" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set the visible of btn "btn-pointeur" to false
+   put 3 into lctr
+   repeat while lctr <= 3
+      set the visible of btn ("btn-gomme" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set visible of btn "btn-surligneur1" to false
+   set visible of btn "btn-surligneur2" to false
+   set the visible of btn "btn-surligneur-couleur1" to false
+   set the visible of btn "btn-surligneur-couleur2" to false
+   set the visible of btn "btn-surligneur-couleur3" to false
+   set the visible of btn "btn-surligneur-couleur4" to false
+   set the visible of btn "btn-ligne1" to false
+   set the visible of btn "btn-ligne2" to false
+   set the visible of btn "btn-ligne3" to false
+   set the visible of btn "btn-formes1" to false
+   set the visible of btn "btn-formes2" to false
+   set the visible of btn "btn-formes3" to false
+   set the visible of btn "btn-formes4" to false
+   set the visible of btn "btn-zoom1" to false
+   set the visible of btn "btn-zoom2" to false
+   set the visible of fld "fld-calculatrice" to false
+   put 1 into lctr
+   repeat while lctr <=20
+      set the visible of btn ("btn-calc" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set the visible of btn "btn-crayon1" to false
+   set the visible of btn "btn-crayon2" to false
+   set the visible of btn "btn-crayon3" to false
+   set the visible of btn "btn-gomme1" to false
+   set the visible of btn "btn-gomme2" to false
+   set the visible of graphic "circle" to false
+   set the visible of graphic "rectangle" to false
+   set the visible of graphic "square" to false
+   set the visible of graphic "triangle" to false
+   set the visible of fld "fld-clavier2" to false
+   set the visible of btn "btn-keyvier" to false
+end hideToolbar
+
+on createSnapshot
+   get the short name of the current stack
+   put it into lStack
+   put the number of the current card into lCard
+   add - 1 to lCard
+   lock screen
+   put (specialFolderPath("resources")&"/Documents"&"/Page"& lCard &"_"& lStack & ".png") into tPathFile
+   export snapshot from rect "0,0,1368,764" to file tPathFile as PNG
+   unlock screen
+   answer "Votre fichier a bien été enregistré dans le dossier Documents"
+end createSnapshot
+
+/*on printCards
+   put the number of the current card into tCardNumber
+   add -1 to tCardNumber
+   put (specialFolderPath("resources") & "/Documents" & "/page" & tCardNumber &  ".pdf") into tPDFPath
+   open printing to pdf tPDFPath
+   if the result is "Cancel" then
+      exit printCards
+   else
+      print the current card of this stack into 0,0,1368,764
+      answer "Your file have been saved"
+   end if
+   close printing
+end printCards*/
+
+command expandToolbox
+   put 1 into lctr
+   repeat while lctr <=12
+      set visible of btn ("btn-outil" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set visible of btn "btn-outil10" to false
+   set visible of img "img-peinture" to true
+   #set the layer of img "img-peinture" to 3
+   set the blendLevel of btn "btn-vertical" to 50
+end expandToolbox
+
+command retractToolbox
+   put 1 into lctr
+    repeat while lctr <=12
+      set visible of btn ("btn-outil" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set visible of img "img-peinture" to false
+   hideCrayonPalette
+   crayonInactif
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   hideFormesPalette
+   deleteForm
+   calculatriceInactif
+   hideKeyboard
+end retractToolbox
+
+command showHorVer
+   set the visible of btn "btn-horizontal" to true
+   set the visible of btn "btn-vertical" to true
+end showHorVer
+
+Command hideHorVer
+   set the visible of btn "btn-horizontal" to false
+   set the visible of btn "btn-vertical" to false
+   crayonInactif
+   hideCrayonPalette
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   retractToolbox
+   pointerInactif
+end hideHorVer
+
+command CrayonActif
+   set the showBorder of btn "btn-outil1" to true
+   set the borderWidth of btn "btn-outil1" to 2
+   set the visible of btn "btn-crayon1" to true
+   set the visible of btn "btn-crayon2" to true
+   set the visible of btn "btn-crayon3" to true
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   pointerInactif
+   clavierInactif
+   formInactif2
+   hideFormesPalette
+   hideKeyboard
+   calculatriceInactif
+   zoomInactif
+end CrayonActif
+
+command crayonActif2
+    set the showBorder of btn "btn-outil1" to true
+   set the borderWidth of btn "btn-outil1" to 2
+   set the visible of btn "btn-crayon1" to true
+   set the visible of btn "btn-crayon2" to true
+   set the visible of btn "btn-crayon3" to true
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   hideFormesPalette
+   ligneInactif
+   hideLinePalette
+end crayonActif2
+
+command crayonInactif
+   set the showBorder of btn "btn-outil1" to false
+   set the borderWidth of btn "btn-outil1" to 0
+   set the visible of btn "btn-crayon1" to false
+   set the visible of btn "btn-crayon2" to false
+   set the visible of btn "btn-crayon3" to false
+   hideCrayonPalette
+   set the blendLevel of btn "btn-crayon1" to 0
+   set the blendLevel of btn "btn-crayon2" to 0
+   set the blendLevel of btn "btn-crayon3" to 0
+end crayonInactif
+
+on showCrayonPalette
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the visible of btn ("btn-crayon-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+end showCrayonPalette
+
+on hideCrayonPalette
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the visible of btn ("btn-crayon-couleur" & lctr) to false
+      add 1 to lctr
+   end repeat
+end hideCrayonPalette
+
+command gommeActif
+   set the showBorder of btn "btn-outil2" to true
+   set the borderWidth of btn "btn-outil2" to 2
+   set the visible of btn "btn-gomme1" to true
+   set the visible of btn "btn-gomme2" to true
+   set the visible of btn "btn-gomme3" to true
+   hideCrayonPalette
+   crayonInactif
+   surligneurInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   pointerInactif
+   clavierInactif
+   hideKeyboard
+   formInactif2
+   hideFormesPalette
+   pointerInactif
+   calculatriceInactif
+   zoomInactif
+end gommeActif
+
+command gommeActif2
+   set the showBorder of btn "btn-outil2" to true
+   set the borderWidth of btn "btn-outil2" to 2
+   set the visible of btn "btn-gomme1" to true
+   set the visible of btn "btn-gomme2" to true
+   set the visible of btn "btn-gomme3" to true
+   hideCrayonPalette
+   crayonInactif
+   surligneurInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   hideFormesPalette
+end gommeActif2
+
+command gommeInactif
+   set the showBorder of btn "btn-outil2" to false
+   set the borderWidth of btn "btn-outil2" to 0
+   set the visible of btn "btn-gomme1" to false
+   set the visible of btn "btn-gomme2" to false
+   set the visible of btn "btn-gomme3" to false
+   set the blendLevel of btn "btn-gomme1" to 0
+   set the blendLevel of btn "btn-gomme2" to 0
+   set the blendLevel of btn "btn-gomme3" to 0
+end gommeInactif
+
+command surligneurActif
+   set the showBorder of btn "btn-outil3" to true
+   set the borderWidth of btn "btn-outil3" to 2
+   set the visible of btn "btn-surligneur1" to true
+   set the visible of btn "btn-surligneur2" to true
+   hideCrayonPalette
+   crayonInactif
+   gommeInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   pointerInactif
+   clavierInactif
+   formInactif2
+   hideKeyboard
+   hideFormesPalette
+   calculatriceInactif
+   zoomInactif
+end surligneurActif
+
+command surligneurActif2
+   set the showBorder of btn "btn-outil3" to true
+   set the borderWidth of btn "btn-outil3" to 2
+   set the visible of btn "btn-surligneur1" to true
+   set the visible of btn "btn-surligneur2" to true
+   hideCrayonPalette
+   crayonInactif
+   gommeInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+end surligneurActif2
+
+command surligneurInactif
+   set the showBorder of btn "btn-outil3" to false
+   set the borderWidth of btn "btn-outil3" to 0
+   set the visible of btn "btn-surligneur1" to false
+   set the visible of btn "btn-surligneur2" to false
+   set the blendLevel of btn "btn-surligneur1" to 0
+   set the blendLevel of btn "btn-surligneur2" to 0
+end surligneurInactif
+
+command printerActif
+   set the showBorder of btn "btn-outil10" to true
+   set the borderWidth of btn "btn-outil10" to 2
+   crayonInactif
+   gommeInactif
+   surligneurInactif
+   hideCrayonPalette
+   hideHighlighterPalette
+   formInactif
+   pointerInactif
+   clavierInactif
+   calculatriceInactif
+   hideKeyboard
+   hideFormesPalette
+   printerInactif
+end printerActif
+
+command printerInactif
+   set the showBorder of btn "btn-outil10" to false
+   set the borderWidth of btn "btn-outil10" to 0
+end printerInactif
+
+command showHighlighterPalette
+   put 1 into lctr
+   repeat while lctr <= 4
+      set visible of btn ("btn-surligneur-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+end showHighlighterPalette
+
+command hideHighlighterPalette
+    put 1 into lctr
+   repeat while lctr <= 4
+      set visible of btn ("btn-surligneur-couleur" & lctr) to false
+      add 1 to lctr
+   end repeat
+end hideHighlighterPalette
+
+command ligneActif
+   set the showBorder of btn "btn-outil4" to true
+   set the borderWidth of btn "btn-outil4" to 2
+   put 1 into lctr
+   repeat while lctr <= 3
+      set the visible of btn ("btn-ligne" & lctr) to true
+      add 1 to lctr
+   end repeat
+   crayonInactif
+   gommeInactif
+   surligneurInactif
+   hideCrayonPalette
+   hideHighlighterPalette
+   pointerInactif
+   clavierInactif
+   hideKeyboard
+   calculatriceInactif
+   formInactif2
+   hideFormesPalette
+   zoomInactif
+end ligneActif
+
+command ligneActif2
+   set the showBorder of btn "btn-outil4" to true
+   set the borderWidth of btn "btn-outil4" to 2
+   put 1 into lctr
+   repeat while lctr <= 3
+      set the visible of btn ("btn-ligne" & lctr) to true
+      add 1 to lctr
+   end repeat
+   crayonInactif
+   gommeInactif
+   surligneurInactif
+   hideCrayonPalette
+   hideHighlighterPalette
+   hideFormesPalette
+end ligneActif2
+
+command ligneInactif
+   set the showBorder of btn "btn-outil4" to false
+   set the borderWidth of btn "btn-outil4" to 0
+    put 1 into lctr
+   repeat while lctr <= 3
+      set the visible of btn ("btn-ligne" & lctr) to false
+      set the blendLevel btn ("btn-ligne" & lctr) to 0
+      add 1 to lctr
+   end repeat
+   hideLinePalette
+end ligneInactif
+
+command showLinePalette
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the visible of btn ("btn-ligne-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+end showLinePalette
+
+command hideLinePalette
+    put 1 into lctr
+   repeat while lctr <= 16
+      set the visible of btn ("btn-ligne-couleur" & lctr) to false
+      add 1 to lctr
+   end repeat
+end hideLinePalette
+
+command clearActif
+   set the showBorder of btn "btn-outil5" to true
+   set the borderWidth of btn "btn-outil5" to 2
+   crayonInactif
+   gommeInactif
+   surligneurInactif
+   ligneInactif
+   hideCrayonPalette
+   hideHighlighterPalette
+   hideLinePalette
+   pointerInactif
+   clavierInactif
+   formInactif2
+   hideFormesPalette
+   zoomInactif
+   hideKeyboard
+   calculatriceInactif
+end clearActif
+
+command clearActif2
+   set the showBorder of btn "btn-outil5" to true
+   set the borderWidth of btn "btn-outil5" to 2
+   crayonInactif
+   gommeInactif
+   surligneurInactif
+   ligneInactif
+   hideCrayonPalette
+   hideHighlighterPalette
+   hideFormesPalette
+   hideLinePalette
+end clearActif2
+
+command clearInactif
+    set the showBorder of btn "btn-outil5" to false
+   set the borderWidth of btn "btn-outil5" to 0
+end clearInactif
+
+command horizontalSelected
+   set the blendLevel of btn "btn-horizontal" to 0
+   set the visible of btn "btn-vertical" to true
+   set the blendLevel of btn "btn-vertical" to 50
+end horizontalSelected
+
+command horizontalUnselected
+   set the blendLevel of btn "btn-horizontal" to 50
+   set the visible of btn "btn-vertical" to true
+   set the blendLevel of btn "btn-vertical" to 0
+end horizontalUnselected
+
+command verticalSelected
+   set the blendLevel of btn "btn-vertical" to 0
+   set the visible of btn "btn-horizontal" to true
+   set the blendLevel of btn "btn-horizontal" to 50
+end verticalSelected
+
+command verticalUnselected
+   set the blendLevel of btn "btn-vertical" to 50
+   set the visible of btn "btn-horizontal" to true
+   set the blendLevel of btn "btn-horizontal" to 0
+end verticalUnselected
+
+command pointerActif
+   set the showBorder of btn "btn-outil6" to true
+   set the borderWidth of btn "btn-outil6" to 2
+   set the visible of btn "btn-pointeur" to true
+   crayonInactif
+   hideCrayonPalette
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   clavierInactif
+   hideKeyboard
+   calculatriceInactif
+   formInactif2
+   hideFormesPalette
+   zoomInactif
+end pointerActif
+
+command pointerInactif
+   set the showBorder of btn "btn-outil6" to false
+   set the borderWidth of btn "btn-outil6" to 0
+   set the visible of btn "btn-pointeur" to false
+end pointerInactif
+
+command windowActif
+    crayonInactif
+   hideCrayonPalette
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   pointerInactif
+   clavierInactif
+   hideKeyboard
+   formInactif
+   hideFormesPalette
+   zoomInactif
+   calculatriceInactif
+end windowActif
+
+command clavierActif
+   set the showBorder of btn "btn-outil12" to true
+   set the borderWidth of btn "btn-outil12" to 2
+   put 0 into gKeyboardType
+   put 0 into gShiftEngaged
+    crayonInactif
+   hideCrayonPalette
+   gommeInactif
+   surligneurInactif
+   hideHighlighterPalette
+   ligneInactif
+   hideLinePalette
+   pointerInactif
+   formInactif2
+   hideFormesPalette
+   calculatriceInactif
+   zoomInactif
+end clavierActif
+
+command clavierInactif
+   set the showBorder of btn "btn-outil12" to false
+   set the borderWidth of btn "btn-outil12" to 0
+   hideAzeQwe
+   set the blendLevel of btn "btn-kb1" to 0
+   set the blendLevel of btn "btn-kb2" to 0
+end clavierInactif
+
+command showAzeQwe
+   set the visible of btn "btn-kb1" to true
+   set the visible of btn "btn-kb2" to true
+end showAzeQwe
+
+command hideAzeQwe
+   set the visible of btn "btn-kb1" to false
+   set the visible of btn "btn-kb2" to false
+end hideAzeQwe
+
+command showKeyboard
+   put 1 into lctr
+   repeat while lctr <= 76
+      set visible of btn ("btn-clavier" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set visible of fld "fld-clavier" to true
+   set the visible of btn "btn-clavier" to true
+   set the visible of fld "fld-clavier2" to true
+   set the visible of btn "btn-keyvier" to true
+end showKeyboard
+
+command hideKeyboard
+    put 1 into lctr
+   repeat while lctr <= 76
+      set visible of btn ("btn-clavier" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set visible of fld "fld-clavier" to false
+   set visible of btn "btn-clavier" to false
+   set the visible of fld "fld-clavier2" to false
+   set the visible of btn "btn-keyvier" to false
+end hideKeyboard
+
+command manageKeyboard
+   #QWERTY keyboard keys
+   put 1 into gKeyboardArray[1][1]
+   put 2 into gKeyboardArray[1][2]
+   put 3 into gKeyboardArray[1][3]
+   put 4 into gKeyboardArray[1][4]
+   put 5 into gKeyboardArray[1][5]
+   put 6 into gKeyboardArray[1][6]
+   put 7 into gKeyboardArray[1][7]
+   put 8 into gKeyboardArray[1][8]
+   put 9 into gKeyboardArray[1][9]
+   put 0 into gKeyboardArray[1][10]
+   put "-" into gKeyboardArray[1][11]
+   put "=" into gKeyboardArray[1][12]
+   put "q" into gKeyboardArray[1][13]
+   put "w" into gKeyboardArray[1][14]
+   put "e" into gKeyboardArray[1][15]
+   put "r" into gKeyboardArray[1][16]
+   put "t" into gKeyboardArray[1][17]
+   put "y" into gKeyboardArray[1][18]
+   put "u" into gKeyboardArray[1][19]
+   put "i" into gKeyboardArray[1][20]
+   put "o" into gKeyboardArray[1][21]
+   put "p" into gKeyboardArray[1][22]
+   put "[" into gKeyboardArray[1][23]
+   put "]" into gKeyboardArray[1][24]
+   put "\" into gKeyboardArray[1][25]
+   put "a" into gKeyboardArray[1][26]
+   put "s" into gKeyboardArray[1][27]
+   put "d" into gKeyboardArray[1][28]
+   put "f" into gKeyboardArray[1][29]
+   put "g" into gKeyboardArray[1][30]
+   put "h" into gKeyboardArray[1][31]
+   put "j" into gKeyboardArray[1][32]
+   put "k" into gKeyboardArray[1][33]
+   put "l" into gKeyboardArray[1][34]
+   put ";" into gKeyboardArray[1][35]
+   put "'" into gKeyboardArray[1][36]
+   put "z" into gKeyboardArray[1][37]
+   put "x" into gKeyboardArray[1][38]
+   put "c" into gKeyboardArray[1][39]
+   put "v" into gKeyboardArray[1][40]
+   put "b" into gKeyboardArray[1][41]
+   put "n" into gKeyboardArray[1][42]
+   put "m" into gKeyboardArray[1][43]
+   put "," into gKeyboardArray[1][44]
+   put "." into gKeyboardArray[1][45]
+   put "/" into gKeyboardArray[1][46]
+   put "à" into gKeyboardArray[1][47]
+   put "á" into gKeyboardArray[1][48]
+   put "â" into gKeyboardArray[1][49]
+   put "ã" into gKeyboardArray[1][50]
+   put "ä" into gKeyboardArray[1][51]
+   put "å" into gKeyboardArray[1][52]
+   put "ç" into gKeyboardArray[1][53]
+   put "è" into gKeyboardArray[1][54]
+   put "é" into gKeyboardArray[1][55]
+   put "ê" into gKeyboardArray[1][56]
+   put "ë" into gKeyboardArray[1][57]
+   put "ì" into gKeyboardArray[1][58]
+   put "í" into gKeyboardArray[1][59]
+   put "î" into gKeyboardArray[1][60]
+   put "ï" into gKeyboardArray[1][61]
+   put "ñ" into gKeyboardArray[1][62]
+   put "ò" into gKeyboardArray[1][63]
+   put "ó" into gKeyboardArray[1][64]
+   put "ô" into gKeyboardArray[1][65]
+   put "õ" into gKeyboardArray[1][66]
+   put "ö" into gKeyboardArray[1][67]
+   put "ù" into gKeyboardArray[1][68]
+   put "ú" into gKeyboardArray[1][69]
+   put "û" into gKeyboardArray[1][70]
+   put "ü" into gKeyboardArray[1][71]
+   put "œ" into gKeyboardArray[1][72]
+   put "!" into gKeyboardArray[2][1]
+   put "@" into gKeyboardArray[2][2]
+   put "#" into gKeyboardArray[2][3]
+   put "$" into gKeyboardArray[2][4]
+   put "%" into gKeyboardArray[2][5]
+   put "^" into gKeyboardArray[2][6]
+   put "&" into gKeyboardArray[2][7]
+   put "*" into gKeyboardArray[2][8]
+   put "(" into gKeyboardArray[2][9]
+   put ")" into gKeyboardArray[2][10]
+   put "_" into gKeyboardArray[2][11]
+   put "+" into gKeyboardArray[2][12]
+   put "Q" into gKeyboardArray[2][13]
+   put "W" into gKeyboardArray[2][14]
+   put "E" into gKeyboardArray[2][15]
+   put "R" into gKeyboardArray[2][16]
+   put "T" into gKeyboardArray[2][17]
+   put "Y" into gKeyboardArray[2][18]
+   put "U" into gKeyboardArray[2][19]
+   put "I" into gKeyboardArray[2][20]
+   put "O" into gKeyboardArray[2][21]
+   put "P" into gKeyboardArray[2][22]
+   put "{" into gKeyboardArray[2][23]
+   put "}" into gKeyboardArray[2][24]
+   put "|" into gKeyboardArray[2][25]
+   put "A" into gKeyboardArray[2][26]
+   put "S" into gKeyboardArray[2][27]
+   put "D" into gKeyboardArray[2][28]
+   put "F" into gKeyboardArray[2][29]
+   put "G" into gKeyboardArray[2][30]
+   put "H" into gKeyboardArray[2][31]
+   put "J" into gKeyboardArray[2][32]
+   put "K" into gKeyboardArray[2][33]
+   put "L" into gKeyboardArray[2][34]
+   put ":" into gKeyboardArray[2][35]
+   put quote into gKeyboardArray[2][36]
+   put "Z" into gKeyboardArray[2][37]
+   put "X" into gKeyboardArray[2][38]
+   put "C" into gKeyboardArray[2][39]
+   put "V" into gKeyboardArray[2][40]
+   put "B" into gKeyboardArray[2][41]
+   put "N" into gKeyboardArray[2][42]
+   put "M" into gKeyboardArray[2][43]
+   put "<" into gKeyboardArray[2][44]
+   put ">" into gKeyboardArray[2][45]
+   put "?" into gKeyboardArray[2][46]
+   put "À" into gKeyboardArray[2][47]
+   put "Á" into gKeyboardArray[2][48]
+   put "Â" into gKeyboardArray[2][49]
+   put "Ã" into gKeyboardArray[2][50]
+   put "Ä" into gKeyboardArray[2][51]
+   put "Å" into gKeyboardArray[2][52]
+   put "Ç" into gKeyboardArray[2][53]
+   put "È" into gKeyboardArray[2][54]
+   put "É" into gKeyboardArray[2][55]
+   put "Ê" into gKeyboardArray[2][56]
+   put "Ë" into gKeyboardArray[2][57]
+   put "Ì" into gKeyboardArray[2][58]
+   put "Í" into gKeyboardArray[2][59]
+   put "Î" into gKeyboardArray[2][60]
+   put "Ï" into gKeyboardArray[2][61]
+   put "Ñ" into gKeyboardArray[2][62]
+   put "Ò" into gKeyboardArray[2][63]
+   put "Ó" into gKeyboardArray[2][64]
+   put "Ô" into gKeyboardArray[2][65]
+   put "Õ" into gKeyboardArray[2][66]
+   put "Ö" into gKeyboardArray[2][67]
+   put "Ù" into gKeyboardArray[2][68]
+   put "Ú" into gKeyboardArray[2][69]
+   put "Û" into gKeyboardArray[2][70]
+   put "Ü" into gKeyboardArray[2][71]
+   put "Œ" into gKeyboardArray[2][72]
+   #AZERTY keyboard keys
+   put "&" into gKeyboardArray[3][1]
+   put "é" into gKeyboardArray[3][2]
+   put quote into gKeyboardArray[3][3]
+   put "'" into gKeyboardArray[3][4]
+   put "(" into gKeyboardArray[3][5]
+   put "-" into gKeyboardArray[3][6]
+   put "è" into gKeyboardArray[3][7]
+   put "_" into gKeyboardArray[3][8]
+   put "ç" into gKeyboardArray[3][9]
+   put "à" into gKeyboardArray[3][10]
+   put ")" into gKeyboardArray[3][11]
+   put "=" into gKeyboardArray[3][12]
+   put "a" into gKeyboardArray[3][13]
+   put "z" into gKeyboardArray[3][14]
+   put "e" into gKeyboardArray[3][15]
+   put "r" into gKeyboardArray[3][16]
+   put "t" into gKeyboardArray[3][17]
+   put "y" into gKeyboardArray[3][18]
+   put "u" into gKeyboardArray[3][19]
+   put "i" into gKeyboardArray[3][20]
+   put "o" into gKeyboardArray[3][21]
+   put "p" into gKeyboardArray[3][22]
+   put "^" into gKeyboardArray[3][23]
+   put "$" into gKeyboardArray[3][24]
+   put "*" into gKeyboardArray[3][25]
+   put "q" into gKeyboardArray[3][26]
+   put "s" into gKeyboardArray[3][27]
+   put "d" into gKeyboardArray[3][28]
+   put "f" into gKeyboardArray[3][29]
+   put "g" into gKeyboardArray[3][30]
+   put "h" into gKeyboardArray[3][31]
+   put "j" into gKeyboardArray[3][32]
+   put "k" into gKeyboardArray[3][33]
+   put "l" into gKeyboardArray[3][34]
+   put "m" into gKeyboardArray[3][35]
+   put "ù" into gKeyboardArray[3][36]
+   put "w" into gKeyboardArray[3][37]
+   put "x" into gKeyboardArray[3][38]
+   put "c" into gKeyboardArray[3][39]
+   put "v" into gKeyboardArray[3][40]
+   put "b" into gKeyboardArray[3][41]
+   put "n" into gKeyboardArray[3][42]
+   put "," into gKeyboardArray[3][43]
+   put ";" into gKeyboardArray[3][44]
+   put ":" into gKeyboardArray[3][45]
+   put "!" into gKeyboardArray[3][46]
+   put "<" into gKeyboardArray[3][47]
+   put "á" into gKeyboardArray[3][48]
+   put "â" into gKeyboardArray[3][49]
+   put "ã" into gKeyboardArray[3][50]
+   put "ä" into gKeyboardArray[3][51]
+   put "å" into gKeyboardArray[3][52]
+   put ">" into gKeyboardArray[3][53]
+   put "]" into gKeyboardArray[3][54]
+   put "[" into gKeyboardArray[3][55]
+   put "ê" into gKeyboardArray[3][56]
+   put "ë" into gKeyboardArray[3][57]
+   put "ì" into gKeyboardArray[3][58]
+   put "í" into gKeyboardArray[3][59]
+   put "î" into gKeyboardArray[3][60]
+   put "ï" into gKeyboardArray[3][61]
+   put "ñ" into gKeyboardArray[3][62]
+   put "ò" into gKeyboardArray[3][63]
+   put "ó" into gKeyboardArray[3][64]
+   put "ô" into gKeyboardArray[3][65]
+   put "õ" into gKeyboardArray[3][66]
+   put "ö" into gKeyboardArray[3][67]
+   put "ù" into gKeyboardArray[3][68]
+   put "ú" into gKeyboardArray[3][69]
+   put "û" into gKeyboardArray[3][70]
+   put "ü" into gKeyboardArray[3][71]
+   put "œ" into gKeyboardArray[3][72]
+   put 1 into gKeyboardArray[4][1]
+   put 2 into gKeyboardArray[4][2]
+   put 3 into gKeyboardArray[4][3]
+   put 4 into gKeyboardArray[4][4]
+   put 5 into gKeyboardArray[4][5]
+   put 6 into gKeyboardArray[4][6]
+   put 7 into gKeyboardArray[4][7]
+   put 8 into gKeyboardArray[4][8]
+   put 9 into gKeyboardArray[4][9]
+   put 0 into gKeyboardArray[4][10]
+   put "°" into gKeyboardArray[4][11]
+   put "+" into gKeyboardArray[4][12]
+   put "A" into gKeyboardArray[4][13]
+   put "Z" into gKeyboardArray[4][14]
+   put "E" into gKeyboardArray[4][15]
+   put "R" into gKeyboardArray[4][16]
+   put "T" into gKeyboardArray[4][17]
+   put "Y" into gKeyboardArray[4][18]
+   put "U" into gKeyboardArray[4][19]
+   put "I" into gKeyboardArray[4][20]
+   put "O" into gKeyboardArray[4][21]
+   put "P" into gKeyboardArray[4][22]
+   put "" into gKeyboardArray[4][23]
+   put "£" into gKeyboardArray[4][24]
+   put "µ" into gKeyboardArray[4][25]
+   put "Q" into gKeyboardArray[4][26]
+   put "S" into gKeyboardArray[4][27]
+   put "D" into gKeyboardArray[4][28]
+   put "F" into gKeyboardArray[4][29]
+   put "G" into gKeyboardArray[4][30]
+   put "H" into gKeyboardArray[4][31]
+   put "J" into gKeyboardArray[4][32]
+   put "K" into gKeyboardArray[4][33]
+   put "L" into gKeyboardArray[4][34]
+   put "M" into gKeyboardArray[4][35]
+   put "%" into gKeyboardArray[4][36]
+   put "W" into gKeyboardArray[4][37]
+   put "X" into gKeyboardArray[4][38]
+   put "C" into gKeyboardArray[4][39]
+   put "V" into gKeyboardArray[4][40]
+   put "B" into gKeyboardArray[4][41]
+   put "N" into gKeyboardArray[4][42]
+   put "?" into gKeyboardArray[4][43]
+   put "." into gKeyboardArray[4][44]
+   put "/" into gKeyboardArray[4][45]
+   put "§" into gKeyboardArray[4][46]
+   put "\" into gKeyboardArray[4][47]
+   put "Á" into gKeyboardArray[4][48]
+   put "Â" into gKeyboardArray[4][49]
+   put "Ã" into gKeyboardArray[4][50]
+   put "Ä" into gKeyboardArray[4][51]
+   put "Å" into gKeyboardArray[4][52]
+   put "Ç" into gKeyboardArray[4][53]
+   put "{" into gKeyboardArray[4][54]
+   put "}" into gKeyboardArray[4][55]
+   put "Ê" into gKeyboardArray[4][56]
+   put "Ë" into gKeyboardArray[4][57]
+   put "Ì" into gKeyboardArray[4][58]
+   put "Í" into gKeyboardArray[4][59]
+   put "Î" into gKeyboardArray[4][60]
+   put "Ï" into gKeyboardArray[4][61]
+   put "Ñ" into gKeyboardArray[4][62]
+   put "Ò" into gKeyboardArray[4][63]
+   put "Ó" into gKeyboardArray[4][64]
+   put "Ô" into gKeyboardArray[4][65]
+   put "Õ" into gKeyboardArray[4][66]
+   put "Ö" into gKeyboardArray[4][67]
+   put "Ù" into gKeyboardArray[4][68]
+   put "Ú" into gKeyboardArray[4][69]
+   put "Û" into gKeyboardArray[4][70]
+   put "Ü" into gKeyboardArray[4][71]
+   put "Œ" into gKeyboardArray[4][72]
+   if gKeyboardType = 1 then
+      put 1 into lctr
+      repeat while lctr <= 72
+         set the label of btn ("btn-clavier" & lctr) to gKeyboardArray[1][lctr]
+         add 1 to lctr
+      end repeat
+   else if gKeyboardType = 2 then
+      put 1 into lctr
+      repeat while lctr <= 72
+         set the label of btn ("btn-clavier" & lctr) to gKeyboardArray[3][lctr]
+         add 1 to lctr
+      end repeat
+   end if
+end manageKeyboard
+
+command keyboardSwitch
+   if gShiftEngaged = 0 and gKeyboardType = 1 then
+      put 1 into lctr
+      repeat while lctr <= 72
+         set the label of btn ("btn-clavier" & lctr) to gKeyboardArray[1][lctr]
+         add 1 to lctr
+      end repeat
+      put 1 into gShiftEngaged
+   else if gShiftEngaged = 0 and gKeyboardType = 2 then
+        put 1 into lctr
+      repeat while lctr <= 72
+         set the label of btn ("btn-clavier" & lctr) to gKeyboardArray[3][lctr]
+         add 1 to lctr
+      end repeat
+      put 1 into gShiftEngaged
+   else if gShiftEngaged = 1 and gKeyboardType = 1 then
+      put 1 into lctr
+      repeat while lctr <= 72
+         set the label of btn ("btn-clavier" & lctr) to gKeyboardArray[2][lctr]
+         add 1 to lctr
+      end repeat
+      put 0 into gShiftEngaged
+   else if  gShiftEngaged = 1 and gKeyboardType = 2 then
+      put 1 into lctr
+      repeat while lctr <= 72
+         set the label of btn ("btn-clavier" & lctr) to gKeyboardArray[4][lctr]
+         add 1 to lctr
+      end repeat
+      put 0 into gShiftEngaged
+      end if
+   end keyboardSwitch
+
+   command formActif
+      set the showBorder of btn "btn-outil8" to true
+      set the borderWidth of btn "btn-outil8" to 2
+      set the visible of btn "btn-formes1" to true
+      set the visible of btn "btn-formes2" to true
+      set the visible of btn "btn-formes3" to true
+      set the visible of btn "btn-formes4" to true
+      crayonInactif
+      hideCrayonPalette
+      gommeInactif
+      surligneurInactif
+      hideHighlighterPalette
+      ligneInactif
+      hideLinePalette
+      calculatriceInactif
+      clavierInactif
+      hideKeyboard
+      pointerInactif
+      zoomInactif
+   end formActif
+
+   command formActif2
+      set the showBorder of btn "btn-outil8" to true
+      set the borderWidth of btn "btn-outil8" to 2
+      set the visible of btn "btn-formes1" to true
+      set the visible of btn "btn-formes2" to true
+      set the visible of btn "btn-formes3" to true
+      set the visible of btn "btn-formes4" to true
+      crayonInactif
+      hideCrayonPalette
+      gommeInactif
+      surligneurInactif
+      hideHighlighterPalette
+      ligneInactif
+      hideLinePalette
+   end formActif2
+
+   command formInactif
+      set the showBorder of btn "btn-outil8" to false
+      set the borderWidth of btn "btn-outil8" to 0
+      set the visible of btn "btn-formes1" to false
+      set the visible of btn "btn-formes2" to false
+      set the visible of btn "btn-formes3" to false
+      set the visible of btn "btn-formes4" to false
+      set the blendLevel of btn "btn-formes1" to 0
+      set the blendlevel of btn "btn-formes2" to 0
+      set the blendLevel of btn "btn-formes3" to 0
+      set the blendLevel of btn "btn-formes4" to 0
+      set the visible of btn "btn-curseur-circle" to false
+      set the visible of btn "btn-curseur-rectangle" to false
+      set the visible of btn "btn-curseur-square" to false
+       set the visible of btn "btn-curseur-triangle" to false
+      hideFormesPalette
+      deleteForm
+   end formInactif
+
+   command formInactif2
+      set the showBorder of btn "btn-outil8" to false
+      set the borderWidth of btn "btn-outil8" to 0
+      set the visible of btn "btn-formes1" to false
+      set the visible of btn "btn-formes2" to false
+      set the visible of btn "btn-formes3" to false
+      set the visible of btn "btn-formes4" to false
+      set the blendLevel of btn "btn-formes1" to 0
+      set the blendlevel of btn "btn-formes2" to 0
+      set the blendLevel of btn "btn-formes3" to 0
+      set the blendLevel of btn "btn-formes4" to 0
+      hideFormesPalette
+   end formInactif2
+
+   command calculatriceActif
+      set the showBorder of btn "btn-outil11" to true
+      set the borderWidth of btn "btn-outil11" to 2
+      put 1 into lctr
+      repeat while lctr <=20
+         set the visible of btn ("btn-calc" & lctr) to true
+         add 1 to lctr
+      end repeat
+      set visible of fld "fld-calculatrice" to true
+      crayonInactif
+      hideCrayonPalette
+      gommeInactif
+      surligneurInactif
+      hideHighlighterPalette
+      ligneInactif
+      hideLinePalette
+      hideKeyboard
+      formInactif2
+      hideFormesPalette
+      clearInactif
+      clavierInactif
+      zoomInactif
+   end calculatriceActif
+
+   command calculatriceInactif
+        set the showBorder of btn "btn-outil11" to false
+      set the borderWidth of btn "btn-outil11" to 0
+      put 1 into lctr
+      repeat while lctr <=20
+         set the visible of btn ("btn-calc" & lctr) to false
+         add 1 to lctr
+      end repeat
+      set visible of fld "fld-calculatrice" to false
+   end calculatriceInactif
+
+   command showFormePalette
+       put 1 into lctr
+      repeat while lctr <= 16
+         set visible of btn ("btn-formes-couleur" & lctr) to true
+         add 1 to lctr
+      end repeat
+      crayonInactif
+      hideCrayonPalette
+      gommeInactif
+      surligneurInactif
+      hideHighlighterPalette
+      ligneInactif
+      hideLinePalette
+      hideKeyboard
+      calculatriceInactif
+   end showFormePalette
+
+   command showFormePalette2
+       put 1 into lctr
+      repeat while lctr <= 16
+         set visible of btn ("btn-formes-couleur" & lctr) to true
+         add 1 to lctr
+      end repeat
+      crayonInactif
+      hideCrayonPalette
+      gommeInactif
+      surligneurInactif
+      hideHighlighterPalette
+      ligneInactif
+      hideLinePalette
+   end showFormePalette2
+
+   command hideFormesPalette
+      put 1 into lctr
+      repeat while lctr <= 16
+         set the visible of btn ("btn-formes-couleur" & lctr) to false
+         add 1 to lctr
+      end repeat
+   end hideFormesPalette
+
+   command placeForm
+      if gForms = 1 then
+            set the visible of graphic "circle" to true
+            set the height of graphic "circle" to 120
+            set the width of graphic "circle" to 120
+            set the loc of graphic "circle" to 682,384
+            set the layer of graphic "circle" to 10
+            set the opaque of graphic "circle" to false
+            set the lineSize of graphic "circle" to 4
+            set the blendLevel of graphic "circle" to 0
+            placeCircle
+            set the script of graphic "circle" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   placeCircle" & cr & "end mouseUp"
+            set the script of btn "btn-curseur-circle" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeCircle" & cr & "end mouseUp"
+         else if gForms = 2 then   
+            set the visible of graphic "rectangle" to true
+            set the loc of graphic "rectangle" to 682,384
+            set the width of graphic "rectangle" to 120
+            set the height of graphic "rectangle" to 90
+            set the layer of the graphic "rectangle" to 11
+            set the opaque of graphic "rectangle" to false
+            set the lineSize of graphic "rectangle" to 4
+            set the blendLevel of graphic "rectangle" to 0
+            placeRectangle
+            set the script of graphic "rectangle" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   placeRectangle" & cr & "end mouseUp"
+         set the script of btn "btn-curseur-rectangle" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeRectangle" & cr & "end mouseUp"
+         else if gForms = 3 then
+            set the visible of graphic "square" to true
+            set the loc of graphic "square" to 682,384
+            set the width of graphic "square" to 120
+            set the height of graphic "square" to 120
+            set the layer of graphic "square" to 12
+            set the opaque of graphic "square" to false
+            set the lineSize of graphic "square" to 4
+            set the blendLevel of graphic "square" to 0
+            placeSquare
+            set the script of graphic "square" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown"& cr & "on mouseUp" & cr & "   placeSquare" & cr & "end mouseUp"
+          set the script of btn "btn-curseur-square" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeSquare" & cr & "end mouseUp"
+         else if gForms = 4 then
+            set the visible of graphic "triangle" to true
+            set the loc of graphic "triangle" to 682,384
+            set the width of graphic "triangle" to 120
+            set the height of graphic "triangle" to 120
+            set the layer of graphic "triangle" to 13
+            set the opaque of graphic "triangle" to false
+            set the lineSize of graphic "triangle" to 4
+            set the blendLevel of graphic "triangle" to 0
+            placeTriangle
+            set the script of graphic "triangle" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   placeTriangle" & cr & "end mouseUp"
+          set the script of btn "btn-curseur-triangle" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeTriangle" & cr & "end mouseUp"
+         end if
+   end placeForm
+
+   command deleteForm
+      switch gForms
+         case 1
+            set the visible of graphic "circle" to false
+            set the visible of graphic "rectangle" to false
+            set the visible of graphic "square" to false
+            set the visible of graphic "triangle" to false
+            break
+         case 2
+             set the visible of graphic "circle" to false
+            set the visible of graphic "rectangle" to false
+            set the visible of graphic "square" to false
+            set the visible of graphic "triangle" to false
+            break
+         case 3
+            set the visible of graphic "circle" to false
+            set the visible of graphic "rectangle" to false
+            set the visible of graphic "square" to false
+            set the visible of graphic "triangle" to false
+            break
+         case 4
+            set the visible of graphic "circle" to false
+            set the visible of graphic "rectangle" to false
+            set the visible of graphic "square" to false
+            set the visible of graphic "triangle" to false
+            break
+      end switch
+   end deleteForm
+
+   command formColor
+      switch gFormColor
+         case 1
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 0,0,0
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 0,0,0
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 0,0,0
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 0,0,0
+            end if
+            break
+         case 2
+             if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 105,105,105
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 105,105,105
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 105,105,105
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 105,105,105
+            end if
+            break
+         case 3
+             if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 190,190,190
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 190,190,190
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 190,190,190
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 190,190,190
+            end if
+            break
+         case 4
+             if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 255,255,255
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 255,255,255
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 255,255,255
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 255,255,255
+            end if
+            break
+         case 5
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 255,0,0
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 255,0,0
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 255,0,0
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 255,0,0
+            end if
+            break
+         case 6
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 255,20,147
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 255,20,147
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 255,20,147
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 255,20,147
+            end if
+            break
+         case 7
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 255,165,0
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 255,165,0
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 255,165,0
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 255,165,0
+            end if
+            break
+         case 8
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 255,255,0
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 255,255,0
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 255,255,0
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 255,255,0
+            end if
+            break
+         case 9
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 238,130,238
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 238,130,238
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 238,130,238
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 238,130,238
+            end if
+            break
+         case 10
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 75,0,130
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 75,0,130
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 75,0,130
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 75,0,130
+            end if
+            break
+         case 11
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 0,0,255
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 0,0,255
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 0,0,255
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 0,0,255
+            end if
+            break
+         case 12
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 173,216,230
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 173,216,230
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 173,216,230
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 173,216,230
+            end if
+            break
+         case 13
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 0,100,0
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 0,100,0
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 0,100,0
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 0,100,0
+            end if
+            break
+         case 14
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 124,252,0
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 124,252,0
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 124,252,0
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 124,252,0
+            end if
+            break
+         case 15
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 139,69,19
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 139,69,19
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 139,69,19
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 139,69,19
+            end if
+            break
+         case 16
+            if gForms = 1 then
+               set the foregroundColor of graphic "circle" to 244,164,96
+            else if gForms = 2 then
+               set the foregroundColor of graphic "rectangle" to 244,164,96
+            else if gForms = 3 then
+               set the foregroundColor of graphic "square" to 244,164,96
+            else if gForms = 4 then
+               set the foregroundColor of graphic "triangle" to 244,164,96
+            end if
+            break
+      end switch
+   end formColor
+
+   command calculatorNumbers pNumbers
+      if gNewNumber is true then
+         put pNumbers into fld "fld-calculatrice"
+         put false into gNewNumber
+      else
+         put pNumbers after fld "fld-calculatrice"
+      end if
+   end calculatorNumbers
+
+   command operatorPressed pOperator
+      put pOperator into gCurrentOperator
+      put fld "fld-calculatrice" into gCurrentTotal
+      put true into gNewNumber
+   end operatorPressed
+
+   command percentagePressed
+      put fld "fld-calculatrice" into tCurrentValue
+      put tCurrentValue/100 into fld "fld-calculatrice"
+      put fld "fld-calculatrice" into gCurrentTotal
+   end percentagePressed
+
+   command togglePressed
+       put fld "fld-calculatrice" into tCurrentValue
+      put -1*tCurrentValue into fld "fld-calculatrice"
+      put fld "fld-calculatrice" into gCurrentTotal
+   end togglePressed
+
+   command equalPressed
+      if gCurrentOperator is empty then exit equalPressed
+      put fld "fld-calculatrice" into tCurrentValue
+      switch gCurrentOperator
+         case "+"
+            put (gCurrentTotal+tCurrentValue) into gCurrentTotal
+            break
+         case "-"
+              put (gCurrentTotal-tCurrentValue) into gCurrentTotal
+              break
+           case "*"
+               put (gCurrentTotal*tCurrentValue) into gCurrentTotal
+               break
+            case "/"
+                put (gCurrentTotal/tCurrentValue) into gCurrentTotal
+            break
+      end switch
+      put gCurrentTotal into fld "fld-calculatrice"
+      put empty into gCurrentOperator
+      put true into gNewNumber
+   end equalPressed
+
+   command shortToolbox
+      # zone de dessin
+   set the loc of img "img-peinture" to 512,300
+   set the width of img "img-peinture" to 850
+   set the height of img "img-peinture" to 450
+   set the layer of img "img-peinture" to 2
+   set the showBorder of img "img-peinture" to false
+   set the borderWidth of img "img-peinture" to 0
+   set the visible of img "img-peinture" to true
+   set the script of img "img-peinture" to "on mouseLeave" & cr & "choose browse tool" & cr & "end mouseLeave"
+
+   #barre d'outils
+       put 1 into lctr
+   put 100 into xTools
+   repeat while lctr <=5
+      set the height of btn ("btn-outil" & lctr) to 40
+      set the height of btn ("btn-outil" & lctr) to 40
+      set the loc of btn ("btn-outil" & lctr) to xTools, 570
+      set the lockLoc of btn ("btn-outil" & lctr) to true
+      set the showName of btn ("btn-outil" & lctr) to false
+      set the opaque of btn ("btn-outil" & lctr) to false
+      set the threeD of btn ("btn-outil" & lctr) to false
+      set the showBorder of btn ("btn-outil" & lctr) to false
+      set the borderWidth of btn ("btn-outil" & lctr) to 0
+      set the layer of btn ("btn-outil" & lctr) to 1
+      add 1 to lctr
+      add 50 to xTools
+   end repeat
+     set the height of btn ("btn-outil8") to 40
+      set the height of btn ("btn-outil8") to 40
+      set the loc of btn ("btn-outil8") to xTools, 570
+      set the lockLoc of btn ("btn-outil8") to true
+      set the showName of btn ("btn-outil8") to false
+      set the opaque of btn ("btn-outil8") to false
+      set the threeD of btn ("btn-outil8") to false
+      set the showBorder of btn ("btn-outil8") to false
+      set the borderWidth of btn ("btn-outil8") to 0
+      set the layer of btn ("btn-outil8") to 1
+      add 50 to xTools
+      set the height of btn ("btn-outil10") to 40
+      set the height of btn ("btn-outil10") to 40
+      set the loc of btn ("btn-outil10") to xTools, 570
+      set the lockLoc of btn ("btn-outil10") to true
+      set the showName of btn ("btn-outil10") to false
+      set the opaque of btn ("btn-outil10") to false
+      set the threeD of btn ("btn-outil10") to false
+      set the showBorder of btn ("btn-outil10") to false
+      set the borderWidth of btn ("btn-outil10") to 0
+      set the layer of btn ("btn-outil10") to 1
+      set the icon of btn "btn-outil1" to "pencil.png"
+   set the script of btn "btn-outil1" to "local lPencil" & cr & "put 0 into lPencil" & cr & "on mouseUp" & cr & "   if lPencil = 0 then" & cr & "      crayonActif2" & cr & "      put 1 into lPencil" & cr & "   else if lPencil = 1 then" & cr & "      crayonInactif" & cr & "      put 0 into lPencil" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(1)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil2" to "eraser.png"
+   set the script of btn "btn-outil2" to "local lEraser" & cr & "put 0 into lEraser" & cr & "on mouseUp" & cr & "   if lEraser = 0 then" & cr & "      gommeActif2" & cr & "      put 1 into lEraser" & cr & "   else if lEraser = 1 then" & cr & "      gommeInactif" & cr & "      put 0 into lEraser" & cr & "   end if " & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(2)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil3" to "highlighter.png"
+   set the script of btn "btn-outil3" to "local lHighlighter" & cr & " put 0 into lHighlighter" & cr &"on mouseUp" & cr & "   if lHighlighter = 0 then" & cr & "      surligneurActif2" & cr & "      put 1 into lHighlighter" & cr & "   else if lHighlighter = 1 then" & cr & "      surligneurInactif" & cr & "  hideHighlighterPalette" & cr & "      put 0 into lHighlighter" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(3)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil4" to "line_2.png"
+   set the script of btn "btn-outil4" to "local lLine" & cr & "put 0 to lLine" & cr & "on mouseUp" & cr & "   if lLine = 0 then" & cr & "      ligneActif2" & cr & "put 1 into lLine" & cr & "    else if lLine = 1 then" & cr & "     ligneInactif" & cr & "      put 0 into lLine" & cr & "   end if" & cr & "end mouseUp" & cr & "on mouseEnter" & cr & "switchInfobulle(4)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+   set the icon of btn "btn-outil5" to "clear.jpg"
+   set the script of btn "btn-outil5" to "on mouseUp" & cr & "   clearActif2" & cr & "   answer " & quote & "Voulez-vous vraiment tout effacer?" &quote & "with " & quote & "Oui" & quote & " or " & quote & "Non" & quote & "" & cr & "   if it is " & quote & "Oui" & quote & " then" & cr & "      put empty into img " & quote & "img-peinture" & quote & "" & cr & "   end if" & cr & "   clearInactif" & cr & " end mouseUp"
+   set the icon of btn "btn-outil8" to "formes_geometriques.png"
+  set the script of btn "btn-outil8" to "local lForm" & cr & "put 0 into lForm" & cr & "on mouseUp" & cr & "   if lForm = 0 then"  & cr & "     formActif2" & cr & "      put 1 into lForm" & cr & "   else if lForm = 1 then" & cr &  "      formInactif" & cr & "      put 0 into lForm"  & cr & "  end if" & cr & "end mouseUp"  & cr & "on mouseEnter" & cr & "switchInfobulle(8)" & cr & "end mouseEnter" & cr & "on mouseLeave" & cr & "  hideInfobulle" & cr & "end mouseLeave"
+  set the icon of btn "btn-outil10" to "imprimante.jpg"
+   set the script of btn "btn-outil10" to "on mouseUp" & cr & "   createSnapshot" & cr & "end mouseUp"
+   set the visible of btn "btn-outil10" to false
+
+    #outil de dessin main libre
+   put 1 into lctr
+   put 80 into xPencil
+   repeat while lctr <= 3
+      set the width of btn ("btn-crayon" & lctr) to 15
+      set the height of btn ("btn-crayon" & lctr) to 15
+      set the threeD of btn ("btn-crayon" & lctr) to false
+      set the showBorder of btn ("btn-crayon" & lctr) to false
+      set the showName of btn ("btn-crayon" & lctr) to false
+      set the borderWidth of btn ("btn-crayon" & lctr) to 0
+      set the layer of btn ("btn-crayon" & lctr) to 1
+      set the lockLoc of btn ("btn-crayon" & lctr) to true
+      set the loc of btn ("btn-crayon" & lctr) to xPencil, 535
+      set the opaque of btn ("btn-crayon" & lctr) to false
+      add 20 to xPencil
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-crayon1" to "3X3.png"
+   set the script of btn "btn-crayon1" to "on mouseUp" & cr &"   set the blendLevel of btn " & quote & "btn-crayon1" & quote & " to 0" & cr &  "   set the blendLevel of btn " & quote & "btn-crayon2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon3" & quote & " to 50" & cr & "   showCrayonPalette" & cr & "   set the brush to 1069" & cr & "end mouseUp"
+   set the icon of btn "btn-crayon2" to "8X8.png"
+    set the script of btn "btn-crayon2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-crayon1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon2" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-crayon3" & quote & " to 50" & cr & "   showCrayonPalette" & cr & "   set the brush to 1071" & cr & "end mouseUp"
+    set the icon of btn "btn-crayon3" to "10X10.png"
+     set the script of btn "btn-crayon3" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-crayon1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-crayon3" & quote & " to 0" & cr & "   showCrayonPalette" & cr & "   set the brush to 1076" & cr & "end mouseUp"
+   # la palette de couleur
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the threeD of btn ("btn-crayon-couleur" & lctr) to false
+      set the showName of btn ("btn-crayon-couleur" & lctr) to false
+      set the showBorder of btn ("btn-crayon-couleur" & lctr) to false
+      set the opaque of btn ("btn-crayon-couleur" & lctr) to true
+      set the borderWidth of btn ("btn-crayon-couleur" & lctr) to 0
+      set the width of btn ("btn-crayon-couleur" & lctr) to 15
+      set the height of btn ("btn-crayon-couleur" & lctr) to 15
+      set the lockLoc of btn ("btn-crayon-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-crayon-couleur1" to 70, 515
+   set the loc of btn "btn-crayon-couleur2" to 90, 515
+   set the loc of btn "btn-crayon-couleur3" to 110, 515
+   set the loc of btn "btn-crayon-couleur4" to 130, 515
+   set the backgroundColor of btn "btn-crayon-couleur1" to 0,0,0
+   set the script of  btn "btn-crayon-couleur1" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 0,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur2" to 105,105,105
+   set the script of  btn "btn-crayon-couleur2" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 105,105,105" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur3" to 190,190,190
+   set the script of  btn "btn-crayon-couleur3" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 190,190,190" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur4" to 255,255,255
+   set the showBorder of btn "btn-crayon-couleur4" to true
+   set borderWidth of btn "btn-crayon-couleur4" to 2
+   set the script of  btn "btn-crayon-couleur4" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,255,255" & cr & "end mouseUp"
+   set the loc of btn "btn-crayon-couleur5" to 70, 495
+   set the loc of btn "btn-crayon-couleur6" to 90, 495
+   set the loc of btn "btn-crayon-couleur7" to 110, 495
+   set the loc of btn "btn-crayon-couleur8" to 130, 495
+   set the backgroundColor of btn "btn-crayon-couleur5" to 255,0,0
+   set the script of  btn "btn-crayon-couleur5" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur6" to 255,20,147
+   set the script of  btn "btn-crayon-couleur6" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,20,147" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur7" to 255,165,0
+   set the script of  btn "btn-crayon-couleur7" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,165,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur8" to 255,255,0
+   set the script of  btn "btn-crayon-couleur8" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 255,255,0" & cr & "end mouseUp"
+   set the loc of btn "btn-crayon-couleur9" to 70, 475
+   set the loc of btn "btn-crayon-couleur10" to 90, 475
+   set the loc of btn "btn-crayon-couleur11" to 110, 475
+   set the loc of btn "btn-crayon-couleur12" to 130, 475
+   set the backgroundColor of btn "btn-crayon-couleur9" to 238,130,238
+   set the script of  btn "btn-crayon-couleur9" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 238,130,238" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur10" to 75,0,130
+   set the script of  btn "btn-crayon-couleur10" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 75,0,130" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur11" to 0,0,255
+   set the script of  btn "btn-crayon-couleur11" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 0,0,255" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur12" to 173,216,230
+   set the script of  btn "btn-crayon-couleur12" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 173,216,230" & cr & "end mouseUp"
+   set the loc of btn "btn-crayon-couleur13" to 70, 455
+   set the loc of btn "btn-crayon-couleur14" to 90, 455
+   set the loc of btn "btn-crayon-couleur15" to 110, 455
+   set the loc of btn "btn-crayon-couleur16" to 130, 455
+   set the backgroundColor of btn "btn-crayon-couleur13" to 0,100,0
+   set the script of  btn "btn-crayon-couleur13" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 0,100,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur14" to 124,252,0
+   set the script of  btn "btn-crayon-couleur14" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 124,252,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur15" to 139,69,19
+   set the script of  btn "btn-crayon-couleur15" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 139,69,19" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-crayon-couleur16" to 244,164,96
+   set the script of  btn "btn-crayon-couleur16" to "on mouseUp" & cr & "   choose the brush tool" & cr & "   set the brushColor to 244,164,96" & cr & "end mouseUp"
+
+   put 1 into lctr
+   put 535 into yEraser
+   repeat while lctr <= 3
+      set the width of btn ("btn-gomme" & lctr) to 20
+      set the height of btn ("btn-gomme" & lctr) to 20
+      set threeD of btn ("btn-gomme" & lctr) to false
+      set showBorder of btn ("btn-gomme" & lctr) to false
+      set the borderWidth of btn ("btn-gomme" & lctr) to 0
+      set the showName of btn ("btn-gomme" & lctr) to false
+      set the lockLoc of btn ("btn-gomme" & lctr) to true
+      set the loc of btn ("btn-gomme" & lctr) to 150, yEraser
+      set the layer of btn ("btn-gomme" & lctr) to 1
+      add 1 to lctr
+      add -20 to yEraser
+   end repeat
+   set the icon of btn "btn-gomme1" to "5X5.png"
+   set the script of btn "btn-gomme1" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-gomme1" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-gomme2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme3" & quote & " to 50" & cr & "   choose the eraser tool" & cr & "   set the eraser to 1065" & cr & "end mouseUp"
+   set the icon of btn "btn-gomme2" to "10X10.png"
+   set the script of btn "btn-gomme2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-gomme1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme2" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-gomme3" & quote & " to 50" & cr & "   choose the eraser tool" & cr & "   set the eraser to 1067" & cr & "end mouseUp"
+   set the icon of btn "btn-gomme3" to "15X15.png"
+   set the script of btn "btn-gomme3" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-gomme1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-gomme3" & quote & " to 0" & cr & "   choose the eraser tool" & cr & "   set the eraser to 1068" & cr & "end mouseUp"
+
+    #outil surligneur
+   put 1 into lctr
+   put 200 into xHighlighter
+   repeat while lctr <= 2
+      set the width of btn ("btn-surligneur" & lctr) to 18
+      set the height of btn ("btn-surligneur" & lctr) to 18
+      set the threeD of btn ("btn-surligneur" & lctr) to false
+      set the showBorder of btn ("btn-surligneur" & lctr) to false
+      set the borderWidth of btn ("btn-surligneur" & lctr) to 0
+      set the showName of btn ("btn-surligneur" & lctr) to false
+      set the lockLoc of btn ("btn-surligneur" & lctr) to true
+      set the loc of btn ("btn-surligneur" & lctr) to xHighlighter, 535
+      set the layer of btn ("btn-surligneur" & lctr) to 1
+      add 1 to lctr
+      add 20 to xHighlighter
+   end repeat
+   set the icon of btn "btn-surligneur1" to "10X10.png"
+   set the script of btn "btn-surligneur1" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-surligneur1" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-surligneur2" & quote & " to 50" & cr & "  set the brush to 1076" & cr & "   showHighlighterPalette" & cr & "end mouseUp"
+   set the icon of btn "btn-surligneur2" to "15X15.png"
+   set the script of btn "btn-surligneur2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-surligneur1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-surligneur2" & quote & " to 0" & cr & "  set the brush to 1072" & cr & "   showHighlighterPalette" & cr & "end mouseUp"
+
+   put 1 into lctr
+   put 515 into yHighlighter
+   repeat while lctr <= 4
+      set the height of btn ("btn-surligneur-couleur" & lctr) to 15
+      set the width of btn ("btn-surligneur-couleur" & lctr)  to 15
+      set the opaque of btn ("btn-surligneur-couleur" & lctr)  to true
+      set the threeD of btn ("btn-surligneur-couleur" & lctr)  to false
+      set the showBorder of btn ("btn-surligneur-couleur" & lctr) to false
+      set the showName of btn ("btn-surligneur-couleur" & lctr) to false
+      set the borderWidth of btn ("btn-surligneur-couleur" & lctr) to 0
+      set the lockLoc of btn ("btn-surligneur-couleur" & lctr) to true
+      set the layer of btn ("btn-surligneur-couleur" & lctr) to 1
+      set the loc of btn ("btn-surligneur-couleur" & lctr) to 210, yHighlighter
+      add 1 to lctr
+      add -20 to yHighlighter
+   end repeat
+   set the backgroundColor of btn "btn-surligneur-couleur1" to 255,215,0
+   set the script of btn "btn-surligneur-couleur1" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 255,215,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-surligneur-couleur2" to 173,255,47
+   set the script of btn "btn-surligneur-couleur2" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 173,255,47" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-surligneur-couleur3" to 0,255,255
+   set the script of btn "btn-surligneur-couleur3" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 0,255,255" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-surligneur-couleur4" to 255,105,180
+   set the script of btn "btn-surligneur-couleur4" to "on mouseUp" & cr & "   choose brush tool" & cr & " set the brushColor to 255,105,180" & cr & "end mouseUp"
+
+    #outil lignes
+   put 1 into lctr
+   put 230 into xLine
+   repeat while lctr <= 3
+      set the height of btn ("btn-ligne" & lctr) to 15
+      set the width of btn ("btn-ligne" & lctr) to 15
+      set the opaque of btn ("btn-ligne" & lctr) to false
+      set the threeD of btn ("btn-ligne" & lctr) to false
+      set the showName of btn ("btn-ligne" & lctr) to false
+      set the showBorder of btn ("btn-ligne" & lctr) to false
+      set the borderWidth of btn ("btn-ligne" & lctr) to 0
+      set the layer of btn ("btn-ligne" & lctr) to 1
+      set the lockLoc of btn ("btn-ligne" & lctr) to true
+      set the loc of btn ("btn-ligne" & lctr) to xLine, 535
+      add 1 to lctr
+      add 20 to xLine
+   end repeat
+   set the icon of btn "btn-ligne1" to "5X5.png"
+   set the script of btn "btn-ligne1" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-ligne1" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-ligne2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne3" & quote & " to 0" & cr & "   set the lineSize to 3" & cr & "  showLinePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-ligne2" to "8X8.png"
+   set the script of btn "btn-ligne2" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-ligne1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne2" & quote & " to 0" & cr & "   set the blendLevel of btn " & quote & "btn-ligne3" & quote & " to 50" & cr & "   set the lineSize to 8" & cr & "  showLinePalette" & cr & "end mouseUp"
+   set the icon of btn "btn-ligne3" to "10X10.png"
+   set the script of btn "btn-ligne3" to "on mouseUp" & cr & "   set the blendLevel of btn " & quote & "btn-ligne1" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne2" & quote & " to 50" & cr & "   set the blendLevel of btn " & quote & "btn-ligne3" & quote & " to 0" & cr & "   set the lineSize to 10" & cr & "  showLinePalette" & cr & "end mouseUp"
+     # la palette de couleur
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the threeD of btn ("btn-ligne-couleur" & lctr) to false
+      set the showName of btn ("btn-ligne-couleur" & lctr) to false
+      set the showBorder of btn ("btn-ligne-couleur" & lctr) to false
+      set the opaque of btn ("btn-ligne-couleur" & lctr) to true
+      set the borderWidth of btn ("btn-ligne-couleur" & lctr) to 0
+      set the width of btn ("btn-ligne-couleur" & lctr) to 15
+      set the height of btn ("btn-ligne-couleur" & lctr) to 15
+      set the lockLoc of btn ("btn-ligne-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-ligne-couleur1" to 230, 515
+   set the loc of btn "btn-ligne-couleur2" to 250, 515
+   set the loc of btn "btn-ligne-couleur3" to 270, 515
+   set the loc of btn "btn-ligne-couleur4" to 290, 515
+   set the backgroundColor of btn "btn-ligne-couleur1" to 0,0,0
+   set the script of btn "btn-ligne-couleur1" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 0,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur2" to 105,105,105
+   set the script of btn "btn-ligne-couleur2" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 105,105,105" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur3" to 190,190,190
+   set the script of btn "btn-ligne-couleur3" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 190,190,190" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur4" to 255,255,255
+   set the showBorder of btn "btn-ligne-couleur4" to true
+   set borderWidth of btn "btn-ligne-couleur4" to 2
+   set the script of btn "btn-ligne-couleur4" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,255,255" & cr & "end mouseUp"
+   set the loc of btn "btn-ligne-couleur5" to 230, 495
+   set the loc of btn "btn-ligne-couleur6" to 250, 495
+   set the loc of btn "btn-ligne-couleur7" to 270, 495
+   set the loc of btn "btn-ligne-couleur8" to 290, 495
+   set the backgroundColor of btn "btn-ligne-couleur5" to 255,0,0
+   set the script of btn "btn-ligne-couleur5" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,0,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur6" to 255,20,147
+   set the script of btn "btn-ligne-couleur6" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,20,147" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur7" to 255,165,0
+   set the script of btn "btn-ligne-couleur7" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,165,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur8" to 255,255,0
+   set the script of btn "btn-ligne-couleur8" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 255,255,0" & cr & "end mouseUp"
+   set the loc of btn "btn-ligne-couleur9" to 230, 475
+   set the loc of btn "btn-ligne-couleur10" to 250, 475
+   set the loc of btn "btn-ligne-couleur11" to 270, 475
+   set the loc of btn "btn-ligne-couleur12" to 290, 475
+   set the backgroundColor of btn "btn-ligne-couleur9" to 238,130,238
+   set the script of btn "btn-ligne-couleur9" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 238,130,238" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur10" to 75,0,130
+   set the script of btn "btn-ligne-couleur10" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 75,0,130" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur11" to 0,0,255
+   set the script of btn "btn-ligne-couleur11" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 0,0,255" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur12" to 173,216,230
+   set the script of btn "btn-ligne-couleur12" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 173,216,230" & cr & "end mouseUp"
+   set the loc of btn "btn-ligne-couleur13" to 230, 455
+   set the loc of btn "btn-ligne-couleur14" to 250, 455
+   set the loc of btn "btn-ligne-couleur15" to 270, 455
+   set the loc of btn "btn-ligne-couleur16" to 290, 455
+   set the backgroundColor of btn "btn-ligne-couleur13" to 0,100,0
+   set the script of btn "btn-ligne-couleur13" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 0,100,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur14" to 124,252,0
+   set the script of btn "btn-ligne-couleur14" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 124,252,0" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur15" to 139,69,19
+   set the script of btn "btn-ligne-couleur15" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 139,69,19" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-ligne-couleur16" to 244,164,96
+   set the script of btn "btn-ligne-couleur16" to "on mouseUp" & cr & "   choose line tool" & cr & "set penColor to 244,164,96" & cr & "end mouseUp"
+
+    #formes
+   put 1 into lctr
+   put 300 into xForms
+   repeat while lctr <= 4
+      set the height of btn ("btn-formes" & lctr) to 20
+      set the width of btn ("btn-formes" & lctr) to 20
+      set the opaque of btn ("btn-formes" & lctr) to false
+      set the threeD of btn ("btn-formes" & lctr) to false
+      set the showName of btn ("btn-formes" & lctr) to false
+      set the borderWidth of btn ("btn-formes" & lctr) to 0
+      set the showBorder of btn ("btn-formes" & lctr) to false
+      set the lockLoc of btn ("btn-formes" & lctr) to true
+      set the layer of btn ("btn-formes" & lctr) to 3
+      set the loc of btn ("btn-formes" & lctr) to xForms, 535
+      add 1 to lctr
+      add 25 to xForms
+   end repeat
+   set the icon of btn "btn-formes1" to "circle.png"
+   set the script of btn "btn-formes1" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 0" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 50" & cr & "   put 1 into gForms" & cr &  "   showFormePalette2" & cr & "end mouseUp"
+   set the icon of btn "btn-formes2" to "rectangle.png"
+   set the script of btn "btn-formes2" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 0" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 50" & cr & "   put 2 into gForms" & cr &  "   showFormePalette2" & cr & "end mouseUp"
+   set the icon of btn "btn-formes3" to "square.png"
+   set the script of btn "btn-formes3" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 0" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 50" & cr & "   put 3 into gForms" & cr & "   showFormePalette2" & cr & "end mouseUp"
+   set the icon of btn "btn-formes4" to "triangle.png"
+   set the script of btn "btn-formes4" to "global gForms" & cr & "on mouseUp" & cr & "    set the blendLevel of btn " & quote & "btn-formes1" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes2" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes3" & quote & " to 50" & cr & "    set the blendLevel of btn " & quote & "btn-formes4" & quote & " to 0" & cr & "   put 4 into gForms" & cr & "   showFormePalette2" & cr & "end mouseUp"
+    # la palette de couleur
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the threeD of btn ("btn-formes-couleur" & lctr) to false
+      set the showName of btn ("btn-formes-couleur" & lctr) to false
+      set the showBorder of btn ("btn-formes-couleur" & lctr) to false
+      set the opaque of btn ("btn-formes-couleur" & lctr) to true
+      set the borderWidth of btn ("btn-formes-couleur" & lctr) to 0
+      set the width of btn ("btn-formes-couleur" & lctr) to 15
+      set the height of btn ("btn-formes-couleur" & lctr) to 15
+      set the lockLoc of btn ("btn-formes-couleur" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-formes-couleur1" to 300,515
+   set the loc of btn "btn-formes-couleur2" to 320,515
+   set the loc of btn "btn-formes-couleur3" to 340,515
+   set the loc of btn "btn-formes-couleur4" to 360,515
+   set the backgroundColor of btn "btn-formes-couleur1" to 0,0,0
+   set the script of btn "btn-formes-couleur1" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 1 into gFormColor" & cr &  "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur2" to 105,105,105
+    set the script of btn "btn-formes-couleur2" to "global gForms, gFormColor" & cr &"on mouseUp" & cr &  "put 2 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+    set the backgroundColor of btn "btn-formes-couleur3" to 190,190,190
+    set the script of btn "btn-formes-couleur3" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 3 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+    set the backgroundColor of btn "btn-formes-couleur4" to 255,255,255
+    set the script of btn "btn-formes-couleur4" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 4 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the showBorder of btn "btn-formes-couleur4" to true
+   set borderWidth of btn "btn-formes-couleur4" to 2
+   set the loc of btn "btn-formes-couleur5" to 300,495
+   set the loc of btn "btn-formes-couleur6" to 320,495
+   set the loc of btn "btn-formes-couleur7" to 340,495
+   set the loc of btn "btn-formes-couleur8" to 360,495
+   set the backgroundColor of btn "btn-formes-couleur5" to 255,0,0
+   set the script of btn "btn-formes-couleur5" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 5 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur6" to 255,20,147
+   set the script of btn "btn-formes-couleur6" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 6 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur7" to 255,165,0
+   set the script of btn "btn-formes-couleur7" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 7 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur8" to 255,255,0
+   set the script of btn "btn-formes-couleur8" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 8 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the loc of btn "btn-formes-couleur9" to 300,475
+   set the loc of btn "btn-formes-couleur10" to 320,475
+   set the loc of btn "btn-formes-couleur11" to 340,475
+   set the loc of btn "btn-formes-couleur12" to 360,475
+   set the backgroundColor of btn "btn-formes-couleur9" to 238,130,238
+   set the script of btn "btn-formes-couleur9" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 9 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur10" to 75,0,130
+   set the script of btn "btn-formes-couleur10" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 10 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur11" to 0,0,255
+   set the script of btn "btn-formes-couleur11" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 11 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur12" to 173,216,230
+   set the script of btn "btn-formes-couleur12" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 12 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the loc of btn "btn-formes-couleur13" to 300,455
+   set the loc of btn "btn-formes-couleur14" to 320,455
+   set the loc of btn "btn-formes-couleur15" to 340,455
+   set the loc of btn "btn-formes-couleur16" to 360,455
+   set the backgroundColor of btn "btn-formes-couleur13" to 0,100,0
+   set the script of btn "btn-formes-couleur13" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 13 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur14" to 124,252,0
+   set the script of btn "btn-formes-couleur14" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 14 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur15" to 139,69,19
+   set the script of btn "btn-formes-couleur15" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 15 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+   set the backgroundColor of btn "btn-formes-couleur16" to 244,164,96
+   set the script of btn "btn-formes-couleur16" to "global gForms, gFormColor" & cr & "on mouseUp" & cr & "put 16 into gFormColor" & cr & "   formColor" & cr &"   placeForm" & cr & "end mouseUp"
+
+#setup of the buttons for resizing the forms
+   set the showName of btn "btn-cadre-circle" to false
+   set the showBorder of btn "btn-cadre-circle" to false
+   set the borderWidth of btn "btn-cadre-circle" to 0
+   set the visible of btn "btn-cadre-circle" to false
+   set the showName of btn "btn-cadre-rectangle" to false
+   set the showBorder of btn "btn-cadre-rectangle" to false
+   set the borderWidth of btn "btn-cadre-rectangle" to 0
+   set the visible of btn "btn-cadre-rectangle" to false
+   set the showName of btn "btn-cadre-square" to false
+   set the showBorder of btn "btn-cadre-square" to false
+   set the borderWidth of btn "btn-cadre-square" to 0
+   set the visible of btn "btn-cadre-square" to false
+   set the showName of btn "btn-cadre-triangle" to false
+   set the showBorder of btn "btn-cadre-triangle" to false
+   set the borderWidth of btn "btn-cadre-triangle" to 0
+   set the visible of btn "btn-cadre-triangle" to false
+   set the showName of btn "btn-curseur-circle" to false
+   set the showBorder of btn "btn-curseur-circle" to false
+   set the borderWidth of btn "btn-curseur-circle" to 0
+   set the backgroundColor of btn "btn-curseur-circle" to "black"
+   set the threeD of btn "btn-curseur-circle" to false
+   set the height of btn "btn-curseur-circle" to 6
+   set the width of btn "btn-curseur-circle" to 6
+   set the showName of btn "btn-curseur-rectangle" to false
+   set the showBorder of btn "btn-curseur-rectangle" to false
+   set the borderWidth of btn "btn-curseur-rectangle" to 0
+   set the backgroundColor of btn "btn-curseur-rectangle" to "black"
+   set the threeD of btn "btn-curseur-rectangle" to false
+   set the height of btn "btn-curseur-rectangle" to 6
+   set the width of btn "btn-curseur-rectangle" to 6
+   set the showName of btn "btn-curseur-square" to false
+   set the showBorder of btn "btn-curseur-square" to false
+   set the borderWidth of btn "btn-curseur-square" to 0
+   set the backgroundColor of btn "btn-curseur-square" to "black"
+   set the threeD of btn "btn-curseur-square" to false
+   set the height of btn "btn-curseur-square" to 6
+   set the width of btn "btn-curseur-square" to 6
+   set the showName of btn "btn-curseur-triangle" to false
+   set the showBorder of btn "btn-curseur-triangle" to false
+   set the borderWidth of btn "btn-curseur-triangle" to 0
+   set the backgroundColor of btn "btn-curseur-triangle" to "black"
+   set the threeD of btn "btn-curseur-triangle" to false
+   set the height of btn "btn-curseur-triangle" to 6
+   set the width of btn "btn-curseur-triangle" to 6
+   set the visible of btn "btn-curseur-circle" to false
+   set the visible of btn "btn-curseur-rectangle" to false
+   set the visible of btn "btn-curseur-square" to false
+   set the visible of btn "btn-curseur-triangle" to false
+   set the margins of fld "infobulle" to 6
+      set the width of fld "infobulle" to 135
+      set the height of  fld "infobulle" to 75
+      set the textAlign of fld "infobulle" to "left"
+      set the blendLevel of fld "infobulle" to 35
+end shortToolbox
+
+   command exitStack
+      set the width of btn "btn-exit" to 20
+      set the height of btn "btn-exit" to 20
+      set the opaque of btn "btn-exit" to true
+      set the icon of btn "btn-exit" to empty
+      set the loc of btn "btn-exit" to 1020,10
+      set showName of btn "btn-exit" to true
+      set threeD of btn "btn-exit" to false
+      set lockLoc of btn "btn-exit" to true
+      set showBorder of btn "btn-exit" to false
+      set borderWidth of btn "btn-exit" to 0
+       set the label of btn "btn-exit" to "X"
+      set the textAlign of btn "btn-exit" to "center"
+      set the textColor of btn "btn-exit" to "white"
+      set the backgroundColor of btn "btn-exit" to 105,105,105
+      set the script of btn "btn-exit" to "on mouseUp" & cr & "answer " & quote & "Voulez-vous fermer cette page?" & quote & "with " & quote & "Oui" & quote & " or " & quote & "Non" & quote & "" & cr & " if it is " & quote & "Oui" & quote & " then" & cr & "close stack " & quote & "fenetre" & quote & "" & cr & " end if" & cr & "end mouseUp"
+   end exitStack
+
+   command exitLecon
+      set the width of btn "btn-sortie" to 20
+      set the height of btn "btn-sortie" to 20
+      set the opaque of btn "btn-sortie" to true
+      set the threeD of btn "btn-sortie" to false
+      set the showBorder of btn "btn-sortie" to false
+      set the borderWidth of btn "btn-sortie" to 0
+      set the loc of btn "btn-sortie" to 1354,10
+      set the lockLoc of btn "btn-sortie" to true
+      set the label of btn "btn-sortie" to "X"
+      set the textAlign of btn "btn-sortie" to "center"
+      set the textColor of btn "btn-sortie" to "white"
+      set the backgroundColor of btn "btn-sortie" to 105,105,105
+      set the script of btn "btn-sortie" to "on mouseUp" & cr & "close stack " & quote & "boite_outils_4" & quote & cr & "end mouseUp"
+   end exitLecon
+
+   command hideInfobulle
+      set the visible of fld "infobulle" to false
+   end hideInfobulle
+
+   command switchInfobulle btnnr
+      get the item 1 of the location of btn ("btn-outil" & btnnr)
+      put it into xInfobulle
+      get item 2 of the location of btn ("btn-outil" & btnnr)
+      put it into yInfobulle
+      if xInfobulle < 75 then
+         add 85 to xInfobulle
+         else if xInfobulle > 75 then
+            add -75 to yInfobulle
+         end if
+      set the visible of fld "infobulle" to true
+      set the loc of fld "infobulle" to xInfobulle,yInfobulle
+      if btnnr = 1 then
+               set the text of fld "infobulle" to "Crayon" & cr & "Outil de dessin main libre"
+            else if btnnr = 2 then
+                        set the text of fld "infobulle" to "Gomme" & cr & "Pour effacer"
+                     else if btnnr = 3 then
+                                 set the text of fld "infobulle" to "Surligneur" & cr & "Pour surligner"
+                              else if btnnr = 4 then
+                                          set the text of fld "infobulle" to "Ligne" & cr & "Pour tracer des lignes droites"
+                                       else if  btnnr = 5 then
+                                                      set the text of fld "infobulle" to "Tout effacer" & cr & "Pour effacer toutes les modifications d'un coup"
+                                                   else if btnnr = 6 then
+                                                               set the text of fld "infobulle" to "Pointeur" & cr & "Pour faire apparaitre un pointeur mobile"
+                                                            else if btnnr = 7 then
+                                                                        set the text of fld "infobulle" to "Page additionnelle" & cr & "Pour faire apparaitre une page aditionnelle"
+                                                                     else if btnnr = 8 then
+                                                                                 set the text of fld "infobulle" to "Formes" & cr & "Pour dessiner des formes géométriques"
+                                                                              else if btnnr = 9 then
+                                                                                          set the text of fld "infobulle" to "Zoom" & cr & "Pour zoomer dans la page active"
+                                                                                       else if btnnr = 11 then
+                                                                                                   set the text of fld "infobulle" to "Calculatrice" & cr & "Pour effectuer des opérations simples"
+                                                                                                else if btnnr = 12 then
+                                                                                                            set the text of fld "infobulle" to "Clavier" & cr & "Pour disposer d'un clavier"
+      end if
+   end switchInfobulle
+
+# barre d'outils horizontale
+command horizontalPosition
+   #barre d'outils
+    put 1 into lctr
+   put 150 into xTools
+   repeat while lctr <=9
+      set the loc of btn ("btn-outil" & lctr) to xTools, 708
+      set the lockLoc of btn ("btn-outil" & lctr) to true
+      add 1 to lctr
+      add 50 to xTools
+   end repeat
+   set the loc of btn "btn-outil11" to 600,708
+   set the loc of btn "btn-outil12" to 650,708
+   #dessin main libre
+    put 1 into lctr
+   put 130 into xPencil
+   repeat while lctr <= 3
+      set the lockLoc of btn ("btn-crayon" & lctr) to true
+      set the loc of btn ("btn-crayon" & lctr) to xPencil, 680
+      add 20 to xPencil
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-crayon-couleur1" to 120, 660
+   set the loc of btn "btn-crayon-couleur2" to 140, 660
+   set the loc of btn "btn-crayon-couleur3" to 160, 660
+   set the loc of btn "btn-crayon-couleur4" to 180, 660
+   set the loc of btn "btn-crayon-couleur5" to 120, 640
+   set the loc of btn "btn-crayon-couleur6" to 140, 640
+   set the loc of btn "btn-crayon-couleur7" to 160, 640
+   set the loc of btn "btn-crayon-couleur8" to 180, 640
+   set the loc of btn "btn-crayon-couleur9" to 120, 620
+   set the loc of btn "btn-crayon-couleur10" to 140, 620
+   set the loc of btn "btn-crayon-couleur11" to 160, 620
+   set the loc of btn "btn-crayon-couleur12" to 180, 620
+   set the loc of btn "btn-crayon-couleur13" to 120, 600
+   set the loc of btn "btn-crayon-couleur14" to 140, 600
+   set the loc of btn "btn-crayon-couleur15" to 160, 600
+   set the loc of btn "btn-crayon-couleur16" to 180, 600
+   #gomme
+   put 1 into lctr
+   put 680 into yEraser
+   repeat while lctr <= 3
+      set the lockLoc of btn ("btn-gomme" & lctr) to true
+      set the loc of btn ("btn-gomme" & lctr) to 200, yEraser
+      add 1 to lctr
+      add -20 to yEraser
+   end repeat
+   #clavier
+   set the loc of btn "btn-kb1" to 695,708
+   set the loc of btn "btn-kb2" to 695,668
+   #Surligneur
+    put 1 into lctr
+   put 235 into xHighlighter
+   repeat while lctr <= 2
+      set the loc of btn ("btn-surligneur" & lctr) to xHighlighter, 680
+      add 1 to lctr
+      add 20 to xHighlighter
+   end repeat
+      put 1 into lctr
+   put 660 into yHighlighter
+   repeat while lctr <= 4
+      set the loc of btn ("btn-surligneur-couleur" & lctr) to 250, yHighlighter
+      add 1 to lctr
+      add -20 to yHighlighter
+   end repeat
+   #Lignes
+    put 1 into lctr
+   put 280 into xLine
+   repeat while lctr <= 3
+      set the loc of btn ("btn-ligne" & lctr) to xLine, 680
+      add 1 to lctr
+      add 20 to xLine
+   end repeat
+   set the loc of btn "btn-ligne-couleur1" to 280, 660
+   set the loc of btn "btn-ligne-couleur2" to 300, 660
+   set the loc of btn "btn-ligne-couleur3" to 320, 660
+   set the loc of btn "btn-ligne-couleur4" to 340, 660
+    set the loc of btn "btn-ligne-couleur5" to 280, 640
+   set the loc of btn "btn-ligne-couleur6" to 300, 640
+   set the loc of btn "btn-ligne-couleur7" to 320, 640
+   set the loc of btn "btn-ligne-couleur8" to 340, 640
+   set the loc of btn "btn-ligne-couleur9" to 280, 620
+   set the loc of btn "btn-ligne-couleur10" to 300, 620
+   set the loc of btn "btn-ligne-couleur11" to 320, 620
+   set the loc of btn "btn-ligne-couleur12" to 340, 620
+    set the loc of btn "btn-ligne-couleur13" to 280, 600
+   set the loc of btn "btn-ligne-couleur14" to 300, 600
+   set the loc of btn "btn-ligne-couleur15" to 320, 600
+   set the loc of btn "btn-ligne-couleur16" to 340, 600
+    #formes
+   put 1 into lctr
+   put 460 into xForms
+   repeat while lctr <= 4
+      set the loc of btn ("btn-formes" & lctr) to xForms, 670
+      add 1 to lctr
+      add 25 to xForms
+   end repeat
+   set the loc of btn "btn-formes-couleur1" to 470,650
+   set the loc of btn "btn-formes-couleur2" to 490,650
+   set the loc of btn "btn-formes-couleur3" to 510,650
+   set the loc of btn "btn-formes-couleur4" to 530,650
+   set the loc of btn "btn-formes-couleur5" to 470,630
+   set the loc of btn "btn-formes-couleur6" to 490,630
+   set the loc of btn "btn-formes-couleur7" to 510,630
+   set the loc of btn "btn-formes-couleur8" to 530,630
+   set the loc of btn "btn-formes-couleur9" to 470,610
+   set the loc of btn "btn-formes-couleur10" to 490,610
+   set the loc of btn "btn-formes-couleur11" to 510,610
+   set the loc of btn "btn-formes-couleur12" to 530,610
+   set the loc of btn "btn-formes-couleur13" to 470,590
+   set the loc of btn "btn-formes-couleur14" to 490,590
+   set the loc of btn "btn-formes-couleur15" to 510,590
+   set the loc of btn "btn-formes-couleur16" to 530,590
+   #zoom
+   put 1 into lctr
+   put 670 into yZoom
+   repeat while lctr <= 2
+      set the loc of btn ("btn-zoom" & lctr) to 550, yZoom
+      add 1 to lctr
+      add -45 to yZoom
+   end repeat
+   #Calculatrice
+   set the loc of btn "btn-calc1" to 560,670
+   set the loc of btn "btn-calc2" to 582,670
+   set the loc of btn "btn-calc3" to 604,670
+   set the loc of btn "btn-calc4" to 626,670
+   set the loc of btn "btn-calc5" to 560,648
+   set the loc of btn "btn-calc6" to 582,648
+   set the loc of btn "btn-calc7" to 604,648
+  set the loc of btn "btn-calc8" to 626,648
+   set the loc of btn "btn-calc9" to 560,626
+   set the loc of btn "btn-calc10" to 582,626
+   set the loc of btn "btn-calc11" to 604,626
+   set the loc of btn "btn-calc12" to 626,626
+   set the loc of btn "btn-calc13" to 560,604
+   set the loc of btn "btn-calc14" to 582,604
+   set the loc of btn "btn-calc15" to 604,604
+   set the loc of btn "btn-calc16" to 626,604
+  set the loc of btn "btn-calc17" to 560,582
+   set the loc of btn "btn-calc18" to 582,582
+   set the loc of btn "btn-calc19" to 604,582
+   set the loc of btn "btn-calc20" to 626,582
+   set the loc of fld "fld-calculatrice" to 593,560
+end horizontalPosition
+
+#barre d'outils verticale
+command verticalPosition
+   set the loc of btn "btn-outil1" to 95,633
+   set the loc of btn "btn-outil2" to 45,583
+   set the loc of btn "btn-outil3" to 45, 533
+   set the loc of btn "btn-outil4" to 45,483
+   set the loc of btn "btn-outil5" to 45,433
+   set the loc of btn "btn-outil6" to 45, 343
+   set the loc of btn "btn-outil7" to 45, 293
+   set the loc of btn "btn-outil8" to 45, 238
+   set the loc of btn "btn-outil9" to 45, 188
+   set the loc of btn "btn-outil11" to 45, 138
+   set the loc of btn "btn-outil12" to 45, 88
+    #dessin main libre
+    put 1 into lctr
+   put 605 into yPencil
+   repeat while lctr <= 3
+      set the loc of btn ("btn-crayon" & lctr) to 140, yPencil
+      add 20 to yPencil
+      add 1 to lctr
+   end repeat
+   set the loc of btn "btn-crayon-couleur1" to 160, 600
+   set the loc of btn "btn-crayon-couleur2" to 160, 620
+   set the loc of btn "btn-crayon-couleur3" to 160, 640
+   set the loc of btn "btn-crayon-couleur4" to 160, 660
+   set the loc of btn "btn-crayon-couleur5" to 180, 600
+   set the loc of btn "btn-crayon-couleur6" to 180, 620
+   set the loc of btn "btn-crayon-couleur7" to 180, 640
+   set the loc of btn "btn-crayon-couleur8" to 180, 660
+   set the loc of btn "btn-crayon-couleur9" to 200, 600
+   set the loc of btn "btn-crayon-couleur10" to 200, 620
+   set the loc of btn "btn-crayon-couleur11" to 200, 640
+   set the loc of btn "btn-crayon-couleur12" to 200, 660
+   set the loc of btn "btn-crayon-couleur13" to 220, 600
+   set the loc of btn "btn-crayon-couleur14" to 220, 620
+   set the loc of btn "btn-crayon-couleur15" to 220, 640
+   set the loc of btn "btn-crayon-couleur16" to 220, 660
+   #gomme
+   put 1 into lctr
+   put 90 into xEraser
+   repeat while lctr <= 3
+      set the loc of btn ("btn-gomme" & lctr) to xEraser, 578
+      add 1 to lctr
+      add 20 to xEraser
+   end repeat
+   #clavier
+   set the loc of btn "btn-kb1" to 90,68
+   set the loc of btn "btn-kb2" to 90,108
+   #Surligneur
+    put 1 into lctr
+   put 513 into yHighlighter
+   repeat while lctr <= 2
+      set the loc of btn ("btn-surligneur" & lctr) to 90,yHighlighter
+      add 1 to lctr
+      add 20 to yHighlighter
+   end repeat
+      put 1 into lctr
+   put 110 into xHighlighter
+   repeat while lctr <= 4
+      set the loc of btn ("btn-surligneur-couleur" & lctr) to xHighlighter, 528
+      add 1 to lctr
+      add 20 to xHighlighter
+   end repeat
+   #Lignes
+    put 1 into lctr
+   put 460 into yLine
+   repeat while lctr <= 3
+      set the loc of btn ("btn-ligne" & lctr) to 90,yLine
+      add 1 to lctr
+      add 20 to yLine
+   end repeat
+   set the loc of btn "btn-ligne-couleur1" to 110, 450
+   set the loc of btn "btn-ligne-couleur2" to 110, 470
+   set the loc of btn "btn-ligne-couleur3" to 110, 490
+   set the loc of btn "btn-ligne-couleur4" to 110, 510
+    set the loc of btn "btn-ligne-couleur5" to 130, 450
+   set the loc of btn "btn-ligne-couleur6" to 130, 470
+   set the loc of btn "btn-ligne-couleur7" to 130, 490
+   set the loc of btn "btn-ligne-couleur8" to 130, 510
+   set the loc of btn "btn-ligne-couleur9" to 150, 450
+   set the loc of btn "btn-ligne-couleur10" to 150, 470
+   set the loc of btn "btn-ligne-couleur11" to 150, 490
+   set the loc of btn "btn-ligne-couleur12" to 150, 510
+    set the loc of btn "btn-ligne-couleur13" to 170, 450
+   set the loc of btn "btn-ligne-couleur14" to 170, 470
+   set the loc of btn "btn-ligne-couleur15" to 170, 490
+   set the loc of btn "btn-ligne-couleur16" to 170, 510
+    #formes
+   put 1 into lctr
+   put 200 into yForms
+   repeat while lctr <= 4
+      set the loc of btn ("btn-formes" & lctr) to 90,yForms
+      add 1 to lctr
+      add 25 to yForms
+   end repeat
+   set the loc of btn "btn-formes-couleur1" to 110,200
+   set the loc of btn "btn-formes-couleur2" to 110,220
+   set the loc of btn "btn-formes-couleur3" to 110,240
+   set the loc of btn "btn-formes-couleur4" to 110,260
+   set the loc of btn "btn-formes-couleur5" to 130,200
+   set the loc of btn "btn-formes-couleur6" to 130,220
+   set the loc of btn "btn-formes-couleur7" to 130,240
+   set the loc of btn "btn-formes-couleur8" to 130,260
+   set the loc of btn "btn-formes-couleur9" to 150,200
+   set the loc of btn "btn-formes-couleur10" to 150,220
+   set the loc of btn "btn-formes-couleur11" to 150,240
+   set the loc of btn "btn-formes-couleur12" to 150,260
+   set the loc of btn "btn-formes-couleur13" to 170,200
+   set the loc of btn "btn-formes-couleur14" to 170,220
+   set the loc of btn "btn-formes-couleur15" to 170,240
+   set the loc of btn "btn-formes-couleur16" to 170,260
+   #zoom
+   put 1 into lctr
+   put 90 into xZoom
+   repeat while lctr <= 2
+      set the loc of btn ("btn-zoom" & lctr) to xZoom,188
+      add 1 to lctr
+      add 45 to xZoom
+   end repeat
+   #Calculatrice
+   set the loc of btn "btn-calc1" to 85,210
+   set the loc of btn "btn-calc2" to 107,210
+   set the loc of btn "btn-calc3" to 129,210
+   set the loc of btn "btn-calc4" to 151,210
+   set the loc of btn "btn-calc5" to 85,188
+   set the loc of btn "btn-calc6" to 107,188
+   set the loc of btn "btn-calc7" to 129,188
+  set the loc of btn "btn-calc8" to 151,188
+   set the loc of btn "btn-calc9" to 85,166
+   set the loc of btn "btn-calc10" to 107,166
+   set the loc of btn "btn-calc11" to 129,166
+   set the loc of btn "btn-calc12" to 151,166
+   set the loc of btn "btn-calc13" to 85,144
+   set the loc of btn "btn-calc14" to 107,144
+   set the loc of btn "btn-calc15" to 129,144
+   set the loc of btn "btn-calc16" to 151,144
+  set the loc of btn "btn-calc17" to 85,122
+   set the loc of btn "btn-calc18" to 107,122
+   set the loc of btn "btn-calc19" to 129,122
+   set the loc of btn "btn-calc20" to 151,122
+   set the loc of fld "fld-calculatrice" to 120,100
+end verticalPosition
+
+command zoomActif
+   set the borderWidth of btn "btn-outil9" to 2
+   set the showBorder of btn "btn-outil9" to true
+   showZoom
+   crayonInactif
+   hideCrayonPalette
+   gommeInactif
+   formInactif2
+   ligneInactif
+   surligneurInactif
+   hideFormesPalette
+   hideHighlighterPalette
+   hideLinePalette
+   pointerInactif
+   calculatriceInactif
+   clavierInactif
+   hideKeyboard
+end zoomActif
+
+command zoomInactif
+   set the borderWidth of btn "btn-outil9" to 0
+   set the showBorder of btn "btn-outil9" to false
+   hideZoom
+end zoomInactif
+
+command showZoom
+   set the visible of btn "btn-zoom1" to true
+   set the visible of btn "btn-zoom2" to true
+end showZoom
+
+command hideZoom
+   set the visible of btn "btn-zoom1" to false
+   set the visible of btn "btn-zoom2" to false
+end hideZoom
+
+command placeCircle
+    set the visible of btn "btn-curseur-circle" to true
+   set the loc of btn "btn-cadre-circle" to the loc of graphic "circle"
+   set the height of btn "btn-cadre-circle" to the height of graphic "circle"
+   set the width of btn "btn-cadre-circle" to the width of graphic "circle"
+   put item 1 of loc of graphic "circle" into xCurseur
+   put item 2 of loc of graphic "circle" into yCurseur
+   add ((height of graphic "circle")/2) to yCurseur
+   add((width of graphic "circle")/2) to xCurseur
+   set the loc of btn "btn-curseur-circle" to xCurseur, yCurseur
+end placeCircle
+
+command placeRectangle
+    set the visible of btn "btn-curseur-rectangle" to true
+   set the loc of btn "btn-cadre-rectangle" to the loc of graphic "rectangle"
+   set the height of btn "btn-cadre-rectangle" to the height of graphic "rectangle"
+   set the width of btn "btn-cadre-rectangle" to the width of graphic "rectangle"
+   put item 1 of loc of graphic "rectangle" into xCurseur
+   put item 2 of loc of graphic "rectangle" into yCurseur
+   add ((height of graphic "rectangle")/2) to yCurseur
+   add((width of graphic "rectangle")/2) to xCurseur
+   set the loc of btn "btn-curseur-rectangle" to xCurseur, yCurseur
+end placeRectangle
+
+command placeSquare
+    set the visible of btn "btn-curseur-square" to true
+   set the loc of btn "btn-cadre-square" to the loc of graphic "square"
+   set the height of btn "btn-cadre-square" to the height of graphic "square"
+   set the width of btn "btn-cadre-square" to the width of graphic "square"
+   put item 1 of loc of graphic "square" into xCurseur
+   put item 2 of loc of graphic "square" into yCurseur
+   add ((height of graphic "square")/2) to yCurseur
+   add((width of graphic "square")/2) to xCurseur
+   set the loc of btn "btn-curseur-square" to xCurseur, yCurseur
+end placeSquare
+
+command placeTriangle
+    set the visible of btn "btn-curseur-triangle" to true
+   set the loc of btn "btn-cadre-triangle" to the loc of graphic "triangle"
+   set the height of btn "btn-cadre-triangle" to the height of graphic "triangle"
+   set the width of btn "btn-cadre-triangle" to the width of graphic "triangle"
+   put item 1 of loc of graphic "triangle" into xCurseur
+   put item 2 of loc of graphic "triangle" into yCurseur
+   add ((height of graphic "triangle")/2) to yCurseur
+   add((width of graphic "triangle")/2) to xCurseur
+   set the loc of btn "btn-curseur-triangle" to xCurseur, yCurseur
+end placeTriangle
+
+command resizeCircle
+   put the item 1 of the loc of btn "btn-curseur-circle" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-circle" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-circle" into xCadreCircle
+   put the item 2 of the loc of btn "btn-cadre-circle" into yCadreCircle
+   put (xSensor - xCadreCircle) into xHalfSize
+   put (ySensor - yCadreCircle) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 20 into yHalfsize
+      set the width of btn "btn-cadre-circle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-circle" to (2*yHalfSize)
+      set the width of graphic "circle" to (2*xHalfSize)
+      set the height of graphic "circle" to (2*yHalfSize)
+      add xHalfSize to xCadreCircle
+      add yHalfSize to yCadreCircle
+      set the loc of btn "btn-curseur-circle" to  xCadreCircle,yCadreCircle
+   else
+      set the width of btn "btn-cadre-circle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-circle" to (2*yHalfSize)
+      set the width of graphic "circle" to (2*xHalfSize)
+      set the height of graphic "circle" to (2*yHalfSize)
+      add xHalfSize to xCadreCircle
+      add yHalfSize to yCadreCircle
+      set the loc of btn "btn-curseur-circle" to xCadreCircle,yCadreCircle
+   end if
+   end resizeCircle
+
+command resizeRectangle
+   put the item 1 of the loc of btn "btn-curseur-rectangle" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-rectangle" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-rectangle" into xCadreRectangle
+   put the item 2 of the loc of btn "btn-cadre-rectangle" into yCadreRectangle
+   put (xSensor - xCadreRectangle) into xHalfSize
+   put (ySensor - yCadreRectangle) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 15 into yHalfsize
+      set the width of btn "btn-cadre-rectangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-rectangle" to (2*yHalfSize)
+      set the width of graphic "rectangle" to (2*xHalfSize)
+      set the height of graphic "rectangle" to (2*yHalfSize)
+      add xHalfSize to xCadreRectangle
+      add yHalfSize to yCadreRectangle
+      set the loc of btn "btn-curseur-rectangle" to  xCadreRectangle,yCadreRectangle
+   else
+      set the width of btn "btn-cadre-rectangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-rectangle" to (2*yHalfSize)
+      set the width of graphic "rectangle" to (2*xHalfSize)
+      set the height of graphic "rectangle" to (2*yHalfSize)
+      add xHalfSize to xCadreRectangle
+      add yHalfSize to yCadreRectangle
+      set the loc of btn "btn-curseur-rectangle" to  xCadreRectangle,yCadreRectangle
+   end if
+end resizeRectangle
+
+command resizeSquare
+   put the item 1 of the loc of btn "btn-curseur-square" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-square" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-square" into xCadreSquare
+   put the item 2 of the loc of btn "btn-cadre-square" into yCadreSquare
+   put (xSensor - xCadreSquare) into xHalfSize
+   put (ySensor - yCadreSquare) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 20 into yHalfsize
+      set the width of btn "btn-cadre-square" to (2*xHalfSize)
+      set the height of btn "btn-cadre-square" to (2*yHalfSize)
+      set the width of graphic "square" to (2*xHalfSize)
+      set the height of graphic "square" to (2*yHalfSize)
+      add xHalfSize to xCadreSquare
+      add yHalfSize to yCadreSquare
+      set the loc of btn "btn-curseur-square" to  xCadreSquare,yCadreSquare
+   else
+      set the width of btn "btn-cadre-square" to (2*xHalfSize)
+      set the height of btn "btn-cadre-square" to (2*yHalfSize)
+      set the width of graphic "square" to (2*xHalfSize)
+      set the height of graphic "square" to (2*yHalfSize)
+      add xHalfSize to xCadreSquare
+      add yHalfSize to yCadreSquare
+      set the loc of btn "btn-curseur-square" to  xCadreSquare,yCadreSquare
+   end if
+end resizeSquare
+
+command resizeTriangle
+   put the item 1 of the loc of btn "btn-curseur-triangle" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-triangle" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-triangle" into xCadreTriangle
+   put the item 2 of the loc of btn "btn-cadre-triangle" into yCadreTriangle
+   put (xSensor - xCadreTriangle) into xHalfSize
+   put (ySensor - yCadreTriangle) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 20 into yHalfsize
+      set the width of btn "btn-cadre-triangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-triangle" to (2*yHalfSize)
+      set the width of graphic "triangle" to (2*xHalfSize)
+      set the height of graphic "triangle" to (2*yHalfSize)
+      add xHalfSize to xCadreTriangle
+      add yHalfSize to yCadreTriangle
+      set the loc of btn "btn-curseur-triangle" to  xCadreTriangle,yCadreTriangle
+   else
+      set the width of btn "btn-cadre-triangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-triangle" to (2*yHalfSize)
+      set the width of graphic "triangle" to (2*xHalfSize)
+      set the height of graphic "triangle" to (2*yHalfSize)
+      add xHalfSize to xCadreTriangle
+      add yHalfSize to yCadreTriangle
+      set the loc of btn "btn-curseur-triangle" to  xCadreTriangle,yCadreTriangle
+   end if
+end resizeTriangle
+
+command zoomButton btnName
+   get the short ID of btn btnName
+   put it into btnID
+   put the item 1 of the loc of btn id btnID into xButton
+   put the item 2 of the loc of  btn id btnID into yButton
+   put the width of btn id btnID into widthButton
+   put the height of btn id btnID into heightButton
+      put the icon of btn id btnID into imgID
+      put the height of btn id btnID into heightImage
+      put the width of btn id btnID into widthImage
+   if gZoomSelected = "+" then
+      put (gZoomLevel*xButton) into xButton
+      put (gZoomLevel*yButton) into yButton
+      put (gZoomLevel*widthButton) into widthButton
+      put (gZoomLevel*heightButton) into heightButton
+      put (gZoomLevel*heightImage) into heightImage
+      put (gZoomLevel*widthImage) into widthImage
+      set the loc of btn id btnID to xButton,yButton
+      set the width of btn id btnID to widthButton
+      set the height of btn id btnID to heightButton
+     # set the height of img id imgID of the card "images" of the stack "Pictures" to heightImage
+     # set the width of img id imgID of the card "images" of the stack "Pictures" to widthImage
+     # set the icon of btn id btnID to imgID
+   else if gZoomSelected = "-" then
+      put (gZoomLevel*xButton) into xButton
+      put (gZoomLevel*yButton) into yButton
+      put (gZoomLevel*widthButton) into widthButton
+      put (gZoomLevel*heightButton) into heightButton
+      put (gZoomLevel*heightImage) into heightImage
+      put (gZoomLevel*widthImage) into widthImage
+      set the loc of btn id btnID to xButton,yButton
+      set the width of btn id btnID to widthButton
+      set the height of btn id btnID to heightButton
+     # set the height of img id imgID of the card "images_reutilisables" of the stack "images"  to heightImage
+     # set the width of img id imgID of the card "images_reutilisables" of the stack "images" to widthImage
+      #set the icon of btn id btnID to imgID
+   end if
+end zoomButton
+
+command zoomImage imgName
+   put the short id of img imgName into imgID
+   put the width of img id imgID into widtfImage
+   put the height of img id imgID into heightImage
+   put the item 1 of the loc of img id imgID into xImage
+   put the item 2 of the loc of img id imgID into yImage
+   if gZoomSelected = "+" then
+      put (gZoomLevel*widthImage) into widthImage
+      put (gZoomLevel*heightImage) into heightImage
+      put (gZoomLevel*xImage) into xImage
+      put (gZoomLevel*yImage) into yImage
+      set the loc of img id imgID to xImage,yImage
+      set the width of img id imgID to widthImage
+      set the height of img id imgID to heightImage
+   else if gZoomSelected = "-" then
+      put (gZoomLevel*widthImage) into widthImage
+      put (gZoomLevel*heightImage) into heightImage
+      put (gZoomLevel*xImage) into xImage
+      put (gZoomLevel*yImage) into yImage
+      set the loc of img id imgID to xImage,yImage
+      set the width of img id imgID to widthImage
+      set the height of img id imgID to heightImage
+   end if
+end zoomImage
+
+command zoomField fldName
+   put the short id of fld fldName into fldID
+   put the width of fld id fldID into widthField
+   put the height of fld id fldID into heightField
+   put the item 1 of the loc of fld id fldID into xField
+   put the item 2 of the loc of fld id fldID into yField
+   put the textSize of fld id fldID into taillePolice
+   if gZoomSelected = "+" then
+      put (gZoomLevel*widthField) into widthField
+      put (gZoomLevel*heightField) into heightField
+      put (gZoomLevel*xField) into xField
+      put (gZoomLevel*yField) into yField
+      set the loc of fld id fldID to xField,yField
+      set the width of fld id fldID to widthField
+      set the height of fld id fldID to heightField
+      add 3 to taillePolice
+      set the textSize of fld id fldID to taillePolice
+   else if gZoomSelected = "-" then
+      put (gZoomLevel*widthField) into widthField
+      put (gZoomLevel*heightField) into heightField
+      put (gZoomLevel*xField) into xField
+      put (gZoomLevel*yField) into yField
+      set the loc of fld id fldID to xField,yField
+      set the width of fld id fldID to widthField
+      set the height of fld id fldID to heightField
+       add -3 to taillePolice
+      set the textSize of fld id fldID to taillePolice
+   end if
+end zoomField
+
+on moveKeyboard
+   put the item 1 of the loc of btn "btn-clavier" into xClavier
+   put the item 2 of the loc of btn "btn-clavier" into yClavier
+   add -220 to xClavier
+   set the loc of fld "fld-clavier" to xClavier,yClavier
+end moveKeyboard
+
+on moveKeyvier
+   put the item 1 of the loc of btn "btn-keyvier" into xClavier
+   put the item 2 of the loc of btn "btn-keyvier" into yClavier
+   add -220 to xClavier
+   set the loc of fld "fld-clavier2" to xClavier,yClavier
+end moveKeyvier
