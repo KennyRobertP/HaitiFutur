@@ -1,4 +1,5 @@
 global gForms, gToolSelected
+global gCurrentOperator, gCurrentTotal, gNewNumber
 
 on preOpenStack
    if the environment is not "development" then
@@ -8,15 +9,15 @@ end preOpenStack
 
 command setupToolbar
    set the width of btn "toolbar" to 70
-   set the height of btn "toolbar" to 420
+   set the height of btn "toolbar" to 470
    set the showName of btn  "toolbar" to false
    set the threeD of btn "toolbar" to false
    set the highlight of btn "toolbar" to false
-   set the loc of btn "toolbar" to 100,300
+   set the loc of btn "toolbar" to 100,325
    set the opaque of btn "toolbar" to false
-   put 125 into yToolbar
+   put 510 into yToolbar
    put 1 into lctr
-   repeat while lctr <= 7
+   repeat while lctr <= 8
       set the width of btn ("tool" & lctr) to 50
       set the height btn ("tool" & lctr) to 50
       set the threeD of btn ("tool" & lctr) to false
@@ -26,16 +27,17 @@ command setupToolbar
       set the showBorder of btn ("tool" & lctr) to false
       set the borderWidth of btn ("tool" & lctr) to 0
       set the opaque of btn ("tool" & lctr) to false
-      add 55 to yToolbar
+      add -55 to yToolbar
       add 1 to lctr
    end repeat
    set the icon of btn "tool1" to 1005
    set the icon of btn "tool2" to 1008
    set the icon of btn "tool3" to 1003
    set the icon of btn "tool4" to 1004
-   set the icon of btn "tool5" to 1006
-   set the icon of btn "tool6" to 1007
+   set the icon of btn "tool5" to 1045
+   set the icon of btn "tool6" to 1048
    set the icon of btn "tool7" to 1009
+   set the icon of btn "tool8" to 1047
    set the width of img "peinture" to 1000
    set the height of img "peinture"  to 500
    set the loc of img "peinture"  to 682,350
@@ -128,6 +130,9 @@ command setupToolbar
    set the threeD of btn "btn-pointeur" to false
    set the visible of btn "btn-pointeur" to false
    set the loc of btn "btn-pointeur" to 750,350
+   set the loc of grp "Palette" to 100,650
+   setupCalculator
+   hideCalculator
 end setupToolbar
 
 command pencilLocation
@@ -135,17 +140,19 @@ command pencilLocation
    put the item 2 of the loc of btn "tool1" into yPencil
    if xPencil <= 682 then
       add 50 to xPencil
+      add -20 to yPencil
       set the loc of btn "pencil1" to xPencil,yPencil
-      add 20 to xPencil
+      add 20 to yPencil
       set the loc of btn "pencil2" to xPencil,yPencil
-      add 20 to xPencil
+      add 20 to yPencil
       set the loc of btn "pencil3" to xPencil,yPencil
    else if xPencil > 682 then 
       add -50 to xPencil
+      add -20 to yPencil
       set the loc of btn "pencil1" to xPencil,yPencil
-      add -20 to xPencil
+      add 20 to xPencil
       set the loc of btn "pencil2" to xPencil,yPencil
-      add -20 to xPencil
+      add 20 to xPencil
       set the loc of btn "pencil3" to xPencil,yPencil
    end if
 end pencilLocation
@@ -155,17 +162,19 @@ command lineLocation
    put the item 2 of the loc of btn "tool2" into yLine
    if xLine <= 682 then
       add 50 to xLine
+      add -20 to yLine
       set the loc of btn "line1" to xLine,yLine
-      add 20 to xLine
+      add 20 to yLine
       set the loc of btn "line2" to xLine,yLine
-      add 20 to xLine
+      add 20 to yLine
       set the loc of btn "line3" to xLine,yLine
    else if xLine> 682 then 
       add -50 to xLine
+      add -20 to yLine
       set the loc of btn "line1" to xLine,yLine
-      add -20 to xLine
+      add 20 to yLine
       set the loc of btn "line2" to xLine,yLine
-      add -20 to xLine
+      add 20 to yLine
       set the loc of btn "line3" to xLine,yLine
    end if
 end lineLocation
@@ -175,17 +184,19 @@ command eraserLocation
    put the item 2 of the loc of btn "tool3" into yEraser
    if xEraser <= 682 then
       add 50 to xEraser
+      add - 20 to yEraser
       set the loc of btn "eraser1" to xEraser,yEraser
-      add 20 to xEraser
+      add 20 to yEraser
       set the loc of btn "eraser2" to xEraser,yEraser
-      add 20 to xEraser
+      add 20 to yEraser
       set the loc of btn "eraser3" to xEraser,yEraser
    else if xEraser> 682 then 
       add -50 to xEraser
+      add - 20 to yEraser
       set the loc of btn "eraser1" to xEraser,yEraser
-      add -20 to xEraser
+      add 20 to yEraser
       set the loc of btn "eraser2" to xEraser,yEraser
-      add -20 to xEraser
+      add 20 to yEraser
       set the loc of btn "eraser3" to xEraser,yEraser
    end if
 end eraserLocation
@@ -383,6 +394,7 @@ command pencilSelected
    eraserUnselected
    formUnselected
    pointeurUnselected
+   hideCalculator
 end pencilSelected
 
 command pencilUnselected
@@ -403,6 +415,7 @@ command lineSelected
    eraserUnselected
    formUnselected
    pointeurUnselected
+   hideCalculator
 end lineSelected
 
 command lineUnselected
@@ -423,6 +436,7 @@ command eraserSelected
    lineUnselected
    formUnselected
    pointeurUnselected
+   hideCalculator
 end eraserSelected
 
 command eraserUnselected
@@ -444,6 +458,7 @@ command formSelected
    eraserUnselected
    lineUnselected
    pointeurUnselected
+   hideCalculator
 end formSelected
 
 command formUnselected
@@ -460,21 +475,23 @@ command formLocation
    put item 2 of the loc of btn "tool4" into yForm
    if xForm <= 682 then
       add 50 to xForm
+      add -50 to yForm
       set the loc of btn "btn-formes1" to xForm,yForm
-      add 25 to xForm
+      add 25 to yForm
       set the loc of btn "btn-formes2" to xForm,yForm
-      add 25 to xForm
+      add 25 to yForm
       set the loc of btn "btn-formes3" to xForm,yForm
-      add 25 to xForm
+      add 25 to yForm
       set the loc of btn "btn-formes4" to xForm,yForm
    else if xForm > 682 then
       add -50 to xForm
+      add -50 to yForm
       set the loc of btn "btn-formes1" to xForm,yForm
-      add -25 to xForm
+      add 25 to yForm
       set the loc of btn "btn-formes2" to xForm,yForm
-      add -25 to xForm
+      add 25 to yForm
       set the loc of btn "btn-formes3" to xForm,yForm
-      add -25 to xForm
+      add 25 to yForm
       set the loc of btn "btn-formes4" to xForm,yForm
    end if
 end formLocation
@@ -745,8 +762,187 @@ command placeForm
    command shortToolbar
       set the loc of img "peinture" to 700,250
       set the visible of btn "tool7" to false
-      set the height of btn "toolbar" to 370
-      set the loc of btn "toolbar" to 100,275
-      set the loc of grp "Palette" to 110,500
-      set the loc of btn "toolbar" to 100,250
+      set the loc of btn "tool8" to 100,175
+      set the height of btn "toolbar" to 420
+      set the loc of grp "Palette" to 100,525
+      set the loc of btn "toolbar" to 100,340
+      set the loc of grp "toolbar" to 100,225
    end shortToolbar
+   
+     on setupCalculator
+      put 1 into lctr
+   repeat while lctr <= 20
+      set the width of btn ("btn-calc" & lctr) to 20
+      set the height of btn ("btn-calc" & lctr) to 20
+      set the lockLoc of btn ("btn-calc" & lctr) to true
+      set the showBorder of btn ("btn-calc" & lctr) to false
+      set the borderWidth of btn ("btn-calc" & lctr) to 0
+      set the threeD of btn ("btn-calc" & lctr) to false
+      set the opaque of btn ("btn-calc" & lctr) to true
+      set the backgroundColor of btn ("btn-calc" & lctr) to 0,0,0
+      set the textColor of btn ("btn-calc" & lctr) to 255,255,255
+      set the textSize of btn ("btn-calc" & lctr) to 16
+      add 1 to lctr
+   end repeat
+   set the width of fld "Calculator" to 100
+   set the height of fld "Calculator" to 25
+   set the lockLoc of fld "Calculator" to true
+   set the textSize of fld "Calculator" to 14
+   set the lockText of fld "Calculator" to true
+   set the backgroundColor of fld "Calculator" to 255,255,255
+   set the borderWidth of fld "Calculator" to 2
+   set the borderColor of fld "Calculator" to 0,0,0
+   set the textColor of fld "Calculator" to 0,0,0
+   set the threeD of fld "Calculator" to false
+   set the loc of btn "btn-calc1" to 460,725
+   set the label of btn "btn-calc1" to "±"
+   set the script of btn "btn-calc1" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "  togglePressed" & cr & "end mouseUp"
+   set the loc of btn "btn-calc2" to 485,725
+   set the label of btn "btn-calc2" to "0"
+   set the script of btn "btn-calc2" to "on mouseUp" & cr & "   calculatorNumbers(0)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc3" to 510,725
+   set the label of btn "btn-calc3" to "."
+   set the loc of btn "btn-calc4" to 535,725
+   set the label of btn "btn-calc4" to "="
+   set the script of btn "btn-calc4" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   equalPressed" & cr & "end mouseUp"
+   set the loc of btn "btn-calc5" to 460,700
+   set the label of btn "btn-calc5" to "1"
+   set the script of btn "btn-calc5" to "on mouseUp" & cr & "  calculatorNumbers(1)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc6" to 485,700
+   set the label of btn "btn-calc6" to "2"
+   set the script of btn "btn-calc6" to "on mouseUp" & cr & "  calculatorNumbers(2)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc7" to 510,700
+   set the label of btn "btn-calc7" to "3"
+   set the script of btn "btn-calc7" to "on mouseUp" & cr & "   calculatorNumbers(3)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc8" to 535,700
+   set the label of btn "btn-calc8" to "+"
+   set the script of btn "btn-calc8" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "+" & quote & ")" & cr & "end mouseUp"
+   set the loc of btn "btn-calc9" to 460,675
+   set the label of btn "btn-calc9" to "4"
+   set the script of btn "btn-calc9" to "on mouseUp" & cr & "   calculatorNumbers(4)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc10" to 485,675
+   set the label of btn "btn-calc10" to "5"
+   set the script of btn "btn-calc10" to "on mouseUp" & cr & "   calculatorNumbers(5)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc11" to 510,675
+   set the label of btn "btn-calc11" to "6"
+   set the script of btn "btn-calc11" to "on mouseUp" & cr & "   calculatorNumbers(6)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc12" to 535,675
+   set the label of btn "btn-calc12" to "-"
+   set the script of btn "btn-calc12" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "-" & quote & ")" & cr & "end mouseUp"
+   set the loc of btn "btn-calc13" to 460,650
+   set the label of btn "btn-calc13" to "7"
+   set the script of btn "btn-calc13" to "on mouseUp" & cr & "   calculatorNumbers(7)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc14" to 485,650
+   set the label of btn "btn-calc14" to "8"
+   set the script of btn "btn-calc14" to "on mouseUp" & cr & "   calculatorNumbers(8)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc15" to 510,650
+   set the label of btn "btn-calc15" to "9"
+   set the script of btn "btn-calc15" to "on mouseUp" & cr & "   calculatorNumbers(9)" & cr & "end mouseUp"
+   set the loc of btn "btn-calc16" to 535,650
+   set the label of btn "btn-calc16" to "*"
+   set the script of btn "btn-calc16" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "*" & quote & ")" & cr & "end mouseUp"
+   set the loc of btn "btn-calc17" to 460,625
+   set the label of btn "btn-calc17" to "C"
+   set the script of btn "btn-calc17" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   put the 0 into fld " & quote & "Calculator" & quote & "" & cr & "put true into gNewNumber" & cr & "end mouseUp"
+   set the loc of btn "btn-calc18" to 485,625
+   set the label of btn "btn-calc18" to "%"
+   set the script of btn "btn-calc18" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   percentagePressed" & cr &"end mouseUp"
+   set the loc of btn "btn-calc19" to 510,625
+   set the label of btn "btn-calc19" to "²"
+   set the script of btn "btn-calc19" to "on mouseUp" & cr & "   put the text of fld " & quote & "Calculator" & quote & " into tCurrentValue" & cr & "put tCurrentValue*tCurrentValue into fld " & quote & "Calculator" & quote & cr & "end mouseUp" 
+   set the loc of btn "btn-calc20" to 535,625
+   set the label of btn "btn-calc20" to "/"
+   set the script of btn "btn-calc20" to "global gCurrentOperator, gCurrentTotal, gNewNumber" & cr & "on mouseUp" & cr & "   operatorPressed(" & quote & "/" & quote & ")" & cr & "end mouseUp"
+   set the loc of fld "Calculator" to 500,600
+   set the textAlign of fld "Calculator" to "right"
+   set the text of fld "Calculator" to 0
+end setupCalculator
+
+   command calculatorNumbers pNumbers
+      if gNewNumber is true then
+         put pNumbers into fld "Calculator"
+         put false into gNewNumber
+      else
+         put pNumbers after fld "Calculator"
+      end if
+   end calculatorNumbers
+   
+   command operatorPressed pOperator
+      put pOperator into gCurrentOperator
+      put fld "Calculator" into gCurrentTotal
+      put true into gNewNumber
+   end operatorPressed
+   
+   command percentagePressed
+      put fld "Calculator" into tCurrentValue
+      put tCurrentValue/100 into fld "Calculator"
+      put fld "Calculator" into gCurrentTotal
+   end percentagePressed
+   
+   command togglePressed
+       put fld "Calculator" into tCurrentValue
+      put -1*tCurrentValue into fld "Calculator"
+      put fld "Calculator" into gCurrentTotal
+   end togglePressed
+   
+   command equalPressed
+      if gCurrentOperator is empty then exit equalPressed
+      put fld "Calculator" into tCurrentValue
+      switch gCurrentOperator
+         case "+"
+            put (gCurrentTotal+tCurrentValue) into gCurrentTotal
+            break
+         case "-"
+              put (gCurrentTotal-tCurrentValue) into gCurrentTotal
+              break
+           case "*"
+               put (gCurrentTotal*tCurrentValue) into gCurrentTotal
+               break
+            case "/"
+                put (gCurrentTotal/tCurrentValue) into gCurrentTotal
+            break
+      end switch
+      put gCurrentTotal into fld "Calculator"
+      put empty into gCurrentOperator
+      put true into gNewNumber
+   end equalPressed
+   
+   command hideCalculator
+      set the showBorder of btn "tool8" to false
+      set the borderWidth of btn "tool8" to 0
+      set the visible of fld "Calculator" to false
+      put 1 into lctr
+      repeat while lctr <= 20
+         set the visible of btn ("btn-calc" & lctr) to false
+         add 1 to lctr
+      end repeat
+   end hideCalculator
+   
+   command showCalculator
+      set the showBorder of btn "tool8" to true
+      set the borderWidth of btn "tool8" to 2
+      lineUnselected
+      eraserUnselected
+      formUnselected
+      pointeurUnselected
+      pencilUnselected
+      set the visible of fld "Calculator" to true
+      put 1 into lctr
+      repeat while lctr <= 20
+         set the visible of btn ("btn-calc" & lctr) to true
+         add 1 to lctr
+      end repeat
+   end showCalculator
+   
+   command calculatorLocation
+      put the item 1 of the loc of btn "tool8" into xCalculator
+      put the item 2 of the loc of btn "tool8" into yCalculator
+      if xCalculator < 682 then
+         add 110 to xCalculator
+         set the loc of grp "Calculator" to xCalculator,yCalculator
+      else if xCalculator > 682 then
+         add -110 to xCalculator
+         set the loc of grp "Calculator" to xCalculator,yCalculator
+      end if
+     
+   end calculatorLocation
