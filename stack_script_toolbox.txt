@@ -1,0 +1,752 @@
+global gForms, gToolSelected
+
+on preOpenStack
+   if the environment is not "development" then
+      set the fullscreenmode of me to "exactFit"
+   end if   
+end preOpenStack
+
+command setupToolbar
+   set the width of btn "toolbar" to 70
+   set the height of btn "toolbar" to 420
+   set the showName of btn  "toolbar" to false
+   set the threeD of btn "toolbar" to false
+   set the highlight of btn "toolbar" to false
+   set the loc of btn "toolbar" to 100,300
+   set the opaque of btn "toolbar" to false
+   put 125 into yToolbar
+   put 1 into lctr
+   repeat while lctr <= 7
+      set the width of btn ("tool" & lctr) to 50
+      set the height btn ("tool" & lctr) to 50
+      set the threeD of btn ("tool" & lctr) to false
+      set the highlight of btn ("tool" & lctr) to false
+      set the loc of btn ("tool" & lctr) to 100,yToolbar
+      set the showName of btn ("tool" & lctr) to false
+      set the showBorder of btn ("tool" & lctr) to false
+      set the borderWidth of btn ("tool" & lctr) to 0
+      set the opaque of btn ("tool" & lctr) to false
+      add 55 to yToolbar
+      add 1 to lctr
+   end repeat
+   set the icon of btn "tool1" to 1005
+   set the icon of btn "tool2" to 1008
+   set the icon of btn "tool3" to 1003
+   set the icon of btn "tool4" to 1004
+   set the icon of btn "tool5" to 1006
+   set the icon of btn "tool6" to 1007
+   set the icon of btn "tool7" to 1009
+   set the width of img "peinture" to 1000
+   set the height of img "peinture"  to 500
+   set the loc of img "peinture"  to 682,350
+   put empty into img "peinture"
+   put 1 into lctr
+   repeat while lctr <=3
+      set the width of btn ("pencil" & lctr) to 15
+      set the height of btn ("pencil" & lctr) to 15
+      set the threeD of btn ("pencil" & lctr) to false
+      set the showBorder of btn ("pencil" & lctr) to false
+      set the borderWidth of btn ("pencil" & lctr) to 0
+      set the opaque of btn ("pencil" & lctr) to false
+      set the showName of btn ("pencil" & lctr) to false
+      set the visible of btn ("pencil" & lctr) to false
+      set the width of btn ("line" & lctr) to 15
+      set the height of btn ("line" & lctr) to 15
+      set the threeD of btn ("line" & lctr) to false
+      set the showBorder of btn ("line" & lctr) to false
+      set the borderWidth of btn ("line" & lctr)to 0
+      set the opaque of btn ("line" & lctr) to false
+      set the showName of btn ("line" & lctr)to false
+      set the visible of btn ("line" & lctr) to false
+      set the width of btn ("eraser" & lctr) to 15
+      set the height of btn ("eraser" & lctr) to 15
+      set the threeD of btn ("eraser" & lctr) to false
+      set the showBorder of btn ("eraser" & lctr) to false
+      set the borderWidth of btn ("eraser" & lctr) to 0
+      set the opaque of btn ("eraser" & lctr) to false
+      set the showName of btn ("eraser" & lctr) to false
+      set the visible of btn ("eraser" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set the icon of btn "pencil1" to 1013
+   set the icon of btn "pencil2" to 1014
+   set the icon of btn "pencil3"  to 1015
+   set the icon of btn "line1" to 1013
+   set the icon of btn "line2" to 1014
+   set the icon of btn "line3"  to 1015
+   set the icon of btn "eraser1" to 1013
+   set the icon of btn "eraser2" to 1014
+   set the icon of btn "eraser3"  to 1015
+   setupColorPalette
+   put 1 into lctr
+   repeat while lctr <= 4
+      set the width of btn ("btn-formes" & lctr) to 20
+      set the height of btn ("btn-formes" & lctr)  to 20
+      set the threeD of btn ("btn-formes" & lctr)  to false
+      set the opaque of btn ("btn-formes" & lctr)  to false
+      set the showName of btn ("btn-formes" & lctr)  to false
+      set the showBorder of btn ("btn-formes" & lctr) to false
+      set the borderWidth of btn ("btn-formes" & lctr)  to 0
+      set the visible of btn ("btn-formes" & lctr) to false
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-formes1" to "circle.png"
+   set the icon of btn "btn-formes2" to "rectangle.png"
+   set the icon of btn "btn-formes3" to "square.png"
+   set the icon of btn "btn-formes4" to "triangle.png"
+   set the visible of graphic "circle" to false
+   set the visible of btn "btn-curseur-circle" to false
+   set the width of btn "btn-curseur-circle" to 15
+   set the height of btn "btn-curseur-circle" to 15
+   set the showName of btn "btn-curseur-circle" to false
+   set the visible of btn "btn-cadre-circle" to false
+   set the visible of graphic "rectangle" to false
+   set the visible of btn "btn-curseur-rectangle" to false
+   set the width of btn "btn-curseur-rectangle" to 15
+   set the height of btn "btn-curseur-rectangle" to 15
+   set the showName of btn "btn-curseur-rectangle" to false
+   set the visible of btn "btn-cadre-rectangle" to false
+   set the visible of graphic "square" to false
+   set the visible of btn "btn-curseur-square" to false
+   set the width of btn "btn-curseur-square" to 15
+   set the height of btn "btn-curseur-square" to 15
+   set the showName of btn "btn-curseur-square" to false
+   set the visible of btn "btn-cadre-square" to false
+   set the visible of graphic "triangle" to false
+   set the visible of btn "btn-curseur-triangle" to false
+   set the width of btn "btn-curseur-triangle" to 15
+   set the height of btn "btn-curseur-triangle" to 15
+   set the showName of btn "btn-curseur-triangle" to false
+   set the visible of btn "btn-cadre-triangle" to false
+   set the width of btn "btn-pointeur" to 50
+   set the height of btn "btn-pointeur" to 50
+   set the showBorder of btn "btn-pointeur" to false
+   set the borderWidth of btn "btn-pointeur" to 0
+   set the showName of btn "btn-pointeur" to false
+   set the icon of btn "btn-pointeur" to 1045
+   set the opaque of btn "btn-pointeur" to false
+   set the threeD of btn "btn-pointeur" to false
+   set the visible of btn "btn-pointeur" to false
+   set the loc of btn "btn-pointeur" to 750,350
+end setupToolbar
+
+command pencilLocation
+   put the item 1 of the loc of btn "tool1" into xPencil
+   put the item 2 of the loc of btn "tool1" into yPencil
+   if xPencil <= 682 then
+      add 50 to xPencil
+      set the loc of btn "pencil1" to xPencil,yPencil
+      add 20 to xPencil
+      set the loc of btn "pencil2" to xPencil,yPencil
+      add 20 to xPencil
+      set the loc of btn "pencil3" to xPencil,yPencil
+   else if xPencil > 682 then 
+      add -50 to xPencil
+      set the loc of btn "pencil1" to xPencil,yPencil
+      add -20 to xPencil
+      set the loc of btn "pencil2" to xPencil,yPencil
+      add -20 to xPencil
+      set the loc of btn "pencil3" to xPencil,yPencil
+   end if
+end pencilLocation
+
+command lineLocation
+   put the item 1 of the loc of btn "tool2" into xLine
+   put the item 2 of the loc of btn "tool2" into yLine
+   if xLine <= 682 then
+      add 50 to xLine
+      set the loc of btn "line1" to xLine,yLine
+      add 20 to xLine
+      set the loc of btn "line2" to xLine,yLine
+      add 20 to xLine
+      set the loc of btn "line3" to xLine,yLine
+   else if xLine> 682 then 
+      add -50 to xLine
+      set the loc of btn "line1" to xLine,yLine
+      add -20 to xLine
+      set the loc of btn "line2" to xLine,yLine
+      add -20 to xLine
+      set the loc of btn "line3" to xLine,yLine
+   end if
+end lineLocation
+
+command eraserLocation
+   put the item 1 of the loc of btn "tool3" into xEraser
+   put the item 2 of the loc of btn "tool3" into yEraser
+   if xEraser <= 682 then
+      add 50 to xEraser
+      set the loc of btn "eraser1" to xEraser,yEraser
+      add 20 to xEraser
+      set the loc of btn "eraser2" to xEraser,yEraser
+      add 20 to xEraser
+      set the loc of btn "eraser3" to xEraser,yEraser
+   else if xEraser> 682 then 
+      add -50 to xEraser
+      set the loc of btn "eraser1" to xEraser,yEraser
+      add -20 to xEraser
+      set the loc of btn "eraser2" to xEraser,yEraser
+      add -20 to xEraser
+      set the loc of btn "eraser3" to xEraser,yEraser
+   end if
+end eraserLocation
+
+command setupCoverPage
+   put 1 into lctr
+   repeat while lctr <= 2
+      set the threeD of btn ("btn-logo" & lctr) to false
+      set the opaque of btn ("btn-logo" & lctr) to false
+      set the showBorder of btn ("btn-logo" & lctr) to false
+      set the borderWidth of btn ("btn-logo" & lctr) to 0
+      set the width of btn ("btn-logo" & lctr) to 150
+      set the height of btn ("btn-logo" & lctr) to 150
+      set showName of btn ("btn-logo" & lctr) to false
+      set the layer of btn ("btn-logo" & lctr) to top
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-logo1" to "logo_haiti_futur.png"
+   set the icon of btn "btn-logo2" to "esih_logo.png"
+   set the loc of btn "btn-logo1" to 75,75
+   set the lockLoc of btn "btn-logo1" to true
+   set the loc of btn "btn-logo2" to 1265,75
+   set the lockLoc of btn "btn-logo2" to true
+   set the script of btn "btn-logo2" to "on mouseUp" &cr & "launch url " & quote & "http://www.esih.edu" & quote & "" & cr & "end mouseUp"
+   set the script of btn "btn-logo1" to "on mouseUp" & cr & "launch URL " & quote & "http://www.haitifutur.com" & quote & "" & cr& "end mouseUp"
+   #positionnement du titre de la page de couverture
+   set the loc of fld "fld-page-couverture" to 682,65
+   set the lockLoc of fld "fld-page-couverture" to true
+   set the lockText of fld "fld-page-couverture" to true
+   set the textAlign of fld "fld-page-couverture" to "center"
+   set the width of fld "fld-page-couverture" to 1104
+   set the height of fld "fld-page-couverture" to 100
+   set the textSize of fld "fld-page-couverture" to 36
+   set the showBorder of fld "fld-page-couverture" to false
+   set the borderWidth of fld "fld-page-couverture" to 0
+   #positionnement du bouton central
+   set the loc of btn "btn-obj" to 682, 384
+   set the width of btn "btn-obj" to 400
+   set the height of btn "btn-obj" to 400
+   set the lockLoc of btn "btn-obj" to true
+   set threeD of btn "btn-obj" to false
+   set showName of btn "btn-obj" to false
+   set showBorder of btn "btn-obj" to false
+   set opaque of btn "btn-obj" to false
+   set borderWidth of btn "btn-obj" to 0
+   #positionnement du pied de page
+   set the loc of btn "btn-bas-page" to 682,710
+   set the height of btn "btn-bas-page" to 75
+   set the width of btn "btn-bas-page" to 250
+   set the label of btn "btn-bas-page" to "MENFP"
+   set the threeD of btn "btn-bas-page" to false
+   set the opaque of btn "btn-bas-page" to false
+   set the textSize of btn "btn-bas-page" to 36
+   set the textAlign of btn "btn-bas-page" to "center"
+   set the showBorder of btn "btn-bas-page" to false
+   set the borderWidth of btn "btn-bas-page" to 0
+end setupCoverPage
+
+command setupNavigationButtons
+   put 1 into lctr
+   repeat while lctr <= 2
+      set the threeD of btn ("btn-nav" & lctr) to false
+      set the opaque of btn ("btn-nav" & lctr) to false
+      set the showBorder of btn ("btn-nav" & lctr) to false
+      set the borderWidth of btn ("btn-nav" & lctr) to 0
+      set the width of btn ("btn-nav" & lctr) to 50
+      set the height of btn ("btn-nav" & lctr) to 50
+      set showName of btn ("btn-nav" & lctr) to false
+      set the layer of btn ("btn-nav" & lctr) to top
+      add 1 to lctr
+   end repeat
+   set the icon of btn "btn-nav1" to "left_chevron.png"
+   set loc of btn "btn-nav1" to 40,384
+   set the script of btn "btn-nav1" to "on mouseUp" & cr & "go to previous card" & cr & "end mouseUp"
+   set the loc of btn "btn-nav2" to 1322,384
+   set the icon of btn "btn-nav2" to "right_chevron.png"
+   set the script of btn "btn-nav2" to "on mouseUp" & cr & "go to next card" & cr & "end mouseUp"
+   #Gestion des boutons des pages externes 
+   put the number of the current card into lCardNumber
+   put the number of the first card into lFirstCardNumber
+   put the number of the last card into lLastCardNumber
+   if lCardNumber = lFirstCardNumber then
+      set visible of btn "btn-nav1" to false
+   else if lCardNumber =lLastCardNumber then
+      set visible of btn "btn-nav2" to false
+      end if
+end setupNavigationButtons
+
+command createPagination
+   put the number of the current card into lCurrentCard
+   put the number of the last card into lLastCard
+   add - 1 to lCurrentCard
+   add - 1 to lLastCard
+   set the width of btn "btn-pagination" to 75
+   set the width of btn "btn-pagination" to 75
+   set opaque of btn "btn-pagination" to true
+   set loc of btn "btn-pagination" to 1314, 718
+   set the lockLoc of btn "btn-pagination" to true
+   set the label btn "btn-pagination" to "" & lCurrentCard & " / " & lLastCard
+   set the showBorder of btn "btn-pagination" to false
+   set borderWidth of btn "btn-pagination" to 0
+   set showName of btn "btn-pagination" to true
+   set textSize of btn "btn-pagination" to 24
+end createPagination  
+
+command setupActivitySlide
+   set the width of field "fld-titre" to 1024 
+   set the height of field "fld-titre" to 75 
+   set the loc of field "fld-titre" to 682, 50 
+   set the lockLoc of field "fld-titre" to true 
+   set the showBorder of field "fld-titre" to false 
+   set the borderWidth of field "fld-titre" to 0 
+   set textSize of field "fld-titre" to 32 
+   set lockText of field "fld-titre" to true
+   set the layer of field "fld-titre" to 1
+   set the textAlign of fld "fld-titre" to "center"
+   set the width of btn "btn-picto" to 75 
+   set the height of btn "btn-picto" to 75 
+   set the loc of btn "btn-picto" to 38,38 
+   set the lockLoc of btn "btn-picto" to true 
+   set the showBorder of btn "btn-picto" to false 
+   set the borderwidth of btn "btn-picto" to 0 
+   set the opaque of btn "btn-picto" to false 
+   set the threeD of btn "btn-picto" to false
+   set the showName of btn "btn-picto" to false
+   set the label of btn "btn-picto" to "picto"
+   set the layer of btn "btn-picto" to 1
+end setupActivitySlide
+
+command setupColorPalette
+   put 1 into lctr
+   repeat while lctr <= 16
+      set the width of btn ("btn-palette" & lctr) to 20
+      set  the height of btn ("btn-palette" & lctr) to 20
+      set the threeD of btn ("btn-palette" & lctr) to false
+      set the showName of btn ("btn-palette" & lctr) to false
+      if lctr is not 1 then
+         set the showBorder of btn ("btn-palette" & lctr) to false
+         set the borderWidth of btn ("btn-palette" & lctr) to 0
+      else 
+         set the showBorder of btn ("btn-palette" & lctr) to true
+         set the borderWidth of btn ("btn-palette" & lctr) to 2
+      end if
+      set the opaque of btn ("btn-palette" & lctr) to true
+      set the visible of btn ("btn-palette" & lctr) to true
+      add 1 to lctr
+   end repeat
+   set the backgroundColor of btn "btn-palette1" to 255,255,255
+   set the backgroundColor of btn "btn-palette2" to 105,105,105
+   set the backgroundColor of btn "btn-palette3" to 190,190,190
+   set the backgroundColor of btn "btn-palette4" to 0,0,0
+   set the backgroundColor of btn "btn-palette5" to 255,0,0
+   set the backgroundColor of btn "btn-palette6" to 255,20,147
+   set the backgroundColor of btn "btn-palette7" to 255,165,0
+   set the backgroundColor of btn "btn-palette8" to 255,255,0
+   set the backgroundColor of btn "btn-palette9" to 238,130,238
+   set the backgroundColor of btn "btn-palette10" to 75,0,130
+   set the backgroundColor of btn "btn-palette11" to 0,0,255
+   set the backgroundColor of btn "btn-palette12" to 173,216,230
+   set the backgroundColor of btn "btn-palette13" to 0,100,0
+   set the backgroundColor of btn "btn-palette14" to 124,252,0
+   set the backgroundColor of btn "btn-palette15" to 139,69,19
+   set the backgroundColor of btn "btn-palette16" to 244,164,96
+   set the width of btn "Palette" to 110
+   set the height of btn "Palette" to 110
+   set the showName of btn "Palette" to false
+   set the threeD of btn "Palette" to false
+   set the opaque of btn "Palette" to false
+   set the loc of btn "Palette" to 110,580
+   set the loc of btn "btn-palette1" to 75,540
+   set the loc of btn "btn-palette2" to 100,540
+   set the loc of btn "btn-palette3" to 125,540
+   set the loc of btn "btn-palette4" to 150,540
+   set the loc of btn "btn-palette5" to 75,565
+   set the loc of btn "btn-palette6" to 100,565
+   set the loc of btn "btn-palette7" to 125,565
+   set the loc of btn "btn-palette8" to 150,565
+   set the loc of btn "btn-palette9" to 75,590
+   set the loc of btn "btn-palette10" to 100,590
+   set the loc of btn "btn-palette11" to 125,590
+   set the loc of btn "btn-palette12" to 150,590
+   set the loc of btn "btn-palette13" to 75,615
+   set the loc of btn "btn-palette14" to 100,615
+   set the loc of btn "btn-palette15" to 125,615
+   set the loc of btn "btn-palette16" to 150,615
+end setupColorPalette
+
+command pencilSelected
+   set the showBorder of btn "tool1" to true
+   set the borderWidth of btn "tool1" to 2
+   set the visible of btn "pencil1" to true
+   set the visible of btn "pencil2" to true
+   set the visible of btn "pencil3" to true
+   lineUnselected
+   eraserUnselected
+   formUnselected
+   pointeurUnselected
+end pencilSelected
+
+command pencilUnselected
+   set the showBorder of btn "tool1" to false
+   set the borderWidth of btn "tool1" to 0
+   set the visible of btn "pencil1" to false
+   set the visible of btn "pencil2" to false
+   set the visible of btn "pencil3" to false
+end pencilUnselected
+
+command lineSelected
+   set the showBorder of btn "tool2" to true
+   set the borderWidth of btn "tool2" to 2
+   set the visible of btn "line1" to true
+   set the visible of btn "line2" to true
+   set the visible of btn "line3" to true
+   pencilUnselected
+   eraserUnselected
+   formUnselected
+   pointeurUnselected
+end lineSelected
+
+command lineUnselected
+    set the showBorder of btn "tool2" to false
+   set the borderWidth of btn "tool2" to 0
+   set the visible of btn "line1" to false
+   set the visible of btn "line2" to false
+   set the visible of btn "line3" to false
+end lineUnselected
+
+command eraserSelected
+   set the showBorder of btn "tool3" to true
+   set the borderWidth of btn "tool3" to 2
+   set the visible of btn "eraser1" to true
+   set the visible of btn "eraser2" to true
+   set the visible of btn "eraser3" to true
+   pencilUnselected
+   lineUnselected
+   formUnselected
+   pointeurUnselected
+end eraserSelected
+
+command eraserUnselected
+   set the showBorder of btn "tool3" to false
+   set the borderWidth of btn "tool3" to 0
+   set the visible of btn "eraser1" to false
+   set the visible of btn "eraser2" to false
+   set the visible of btn "eraser3" to false
+end eraserUnselected
+
+command formSelected
+   set the showBorder of btn "tool4" to true
+   set the borderWidth of btn "tool4" to 2
+   set the visible of btn "btn-formes1" to true
+   set the visible of btn "btn-formes2" to true
+   set the visible of btn "btn-formes3" to true
+   set the visible of btn "btn-formes4" to true
+   pencilUnselected
+   eraserUnselected
+   lineUnselected
+   pointeurUnselected
+end formSelected
+
+command formUnselected
+   set the showBorder of btn "tool4" to false
+   set the borderWidth of btn "tool4" to 0
+   set the visible of btn "btn-formes1" to false
+   set the visible of btn "btn-formes2" to false
+   set the visible of btn "btn-formes3" to false
+   set the visible of btn "btn-formes4" to false
+end formUnselected
+
+command formLocation
+   put item 1 of the loc of btn "tool4" into xForm
+   put item 2 of the loc of btn "tool4" into yForm
+   if xForm <= 682 then
+      add 50 to xForm
+      set the loc of btn "btn-formes1" to xForm,yForm
+      add 25 to xForm
+      set the loc of btn "btn-formes2" to xForm,yForm
+      add 25 to xForm
+      set the loc of btn "btn-formes3" to xForm,yForm
+      add 25 to xForm
+      set the loc of btn "btn-formes4" to xForm,yForm
+   else if xForm > 682 then
+      add -50 to xForm
+      set the loc of btn "btn-formes1" to xForm,yForm
+      add -25 to xForm
+      set the loc of btn "btn-formes2" to xForm,yForm
+      add -25 to xForm
+      set the loc of btn "btn-formes3" to xForm,yForm
+      add -25 to xForm
+      set the loc of btn "btn-formes4" to xForm,yForm
+   end if
+end formLocation
+
+command placeCircle
+    set the visible of btn "btn-curseur-circle" to true
+   set the loc of btn "btn-cadre-circle" to the loc of graphic "circle"
+   set the height of btn "btn-cadre-circle" to the height of graphic "circle"
+   set the width of btn "btn-cadre-circle" to the width of graphic "circle"
+   put item 1 of loc of graphic "circle" into xCurseur
+   put item 2 of loc of graphic "circle" into yCurseur
+   add ((height of graphic "circle")/2) to yCurseur
+   add((width of graphic "circle")/2) to xCurseur
+   set the loc of btn "btn-curseur-circle" to xCurseur, yCurseur
+end placeCircle
+
+command placeRectangle
+    set the visible of btn "btn-curseur-rectangle" to true
+   set the loc of btn "btn-cadre-rectangle" to the loc of graphic "rectangle"
+   set the height of btn "btn-cadre-rectangle" to the height of graphic "rectangle"
+   set the width of btn "btn-cadre-rectangle" to the width of graphic "rectangle"
+   put item 1 of loc of graphic "rectangle" into xCurseur
+   put item 2 of loc of graphic "rectangle" into yCurseur
+   add ((height of graphic "rectangle")/2) to yCurseur
+   add((width of graphic "rectangle")/2) to xCurseur
+   set the loc of btn "btn-curseur-rectangle" to xCurseur, yCurseur
+end placeRectangle
+
+command placeSquare
+    set the visible of btn "btn-curseur-square" to true
+   set the loc of btn "btn-cadre-square" to the loc of graphic "square"
+   set the height of btn "btn-cadre-square" to the height of graphic "square"
+   set the width of btn "btn-cadre-square" to the width of graphic "square"
+   put item 1 of loc of graphic "square" into xCurseur
+   put item 2 of loc of graphic "square" into yCurseur
+   add ((height of graphic "square")/2) to yCurseur
+   add((width of graphic "square")/2) to xCurseur
+   set the loc of btn "btn-curseur-square" to xCurseur, yCurseur
+end placeSquare
+
+command placeTriangle
+    set the visible of btn "btn-curseur-triangle" to true
+   set the loc of btn "btn-cadre-triangle" to the loc of graphic "triangle"
+   set the height of btn "btn-cadre-triangle" to the height of graphic "triangle"
+   set the width of btn "btn-cadre-triangle" to the width of graphic "triangle"
+   put item 1 of loc of graphic "triangle" into xCurseur
+   put item 2 of loc of graphic "triangle" into yCurseur
+   add ((height of graphic "triangle")/2) to yCurseur
+   add((width of graphic "triangle")/2) to xCurseur
+   set the loc of btn "btn-curseur-triangle" to xCurseur, yCurseur
+end placeTriangle
+
+command resizeCircle
+   put the item 1 of the loc of btn "btn-curseur-circle" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-circle" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-circle" into xCadreCircle
+   put the item 2 of the loc of btn "btn-cadre-circle" into yCadreCircle
+   put (xSensor - xCadreCircle) into xHalfSize
+   put (ySensor - yCadreCircle) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 20 into yHalfsize
+      set the width of btn "btn-cadre-circle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-circle" to (2*yHalfSize)
+      set the width of graphic "circle" to (2*xHalfSize)
+      set the height of graphic "circle" to (2*yHalfSize)
+      add xHalfSize to xCadreCircle
+      add yHalfSize to yCadreCircle
+      set the loc of btn "btn-curseur-circle" to  xCadreCircle,yCadreCircle
+   else
+      set the width of btn "btn-cadre-circle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-circle" to (2*yHalfSize)
+      set the width of graphic "circle" to (2*xHalfSize)
+      set the height of graphic "circle" to (2*yHalfSize)
+      add xHalfSize to xCadreCircle
+      add yHalfSize to yCadreCircle
+      set the loc of btn "btn-curseur-circle" to xCadreCircle,yCadreCircle
+   end if
+   end resizeCircle
+
+command resizeRectangle
+   put the item 1 of the loc of btn "btn-curseur-rectangle" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-rectangle" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-rectangle" into xCadreRectangle
+   put the item 2 of the loc of btn "btn-cadre-rectangle" into yCadreRectangle
+   put (xSensor - xCadreRectangle) into xHalfSize
+   put (ySensor - yCadreRectangle) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 15 into yHalfsize
+      set the width of btn "btn-cadre-rectangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-rectangle" to (2*yHalfSize)
+      set the width of graphic "rectangle" to (2*xHalfSize)
+      set the height of graphic "rectangle" to (2*yHalfSize)
+      add xHalfSize to xCadreRectangle
+      add yHalfSize to yCadreRectangle
+      set the loc of btn "btn-curseur-rectangle" to  xCadreRectangle,yCadreRectangle
+   else
+      set the width of btn "btn-cadre-rectangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-rectangle" to (2*yHalfSize)
+      set the width of graphic "rectangle" to (2*xHalfSize)
+      set the height of graphic "rectangle" to (2*yHalfSize)
+      add xHalfSize to xCadreRectangle
+      add yHalfSize to yCadreRectangle
+      set the loc of btn "btn-curseur-rectangle" to  xCadreRectangle,yCadreRectangle
+   end if
+end resizeRectangle
+
+command resizeSquare
+   put the item 1 of the loc of btn "btn-curseur-square" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-square" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-square" into xCadreSquare
+   put the item 2 of the loc of btn "btn-cadre-square" into yCadreSquare
+   put (xSensor - xCadreSquare) into xHalfSize
+   put (ySensor - yCadreSquare) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 20 into yHalfsize
+      set the width of btn "btn-cadre-square" to (2*xHalfSize)
+      set the height of btn "btn-cadre-square" to (2*yHalfSize)
+      set the width of graphic "square" to (2*xHalfSize)
+      set the height of graphic "square" to (2*yHalfSize)
+      add xHalfSize to xCadreSquare
+      add yHalfSize to yCadreSquare
+      set the loc of btn "btn-curseur-square" to  xCadreSquare,yCadreSquare
+   else
+      set the width of btn "btn-cadre-square" to (2*xHalfSize)
+      set the height of btn "btn-cadre-square" to (2*yHalfSize)
+      set the width of graphic "square" to (2*xHalfSize)
+      set the height of graphic "square" to (2*yHalfSize)
+      add xHalfSize to xCadreSquare
+      add yHalfSize to yCadreSquare
+      set the loc of btn "btn-curseur-square" to  xCadreSquare,yCadreSquare
+   end if
+end resizeSquare
+
+command resizeTriangle
+   put the item 1 of the loc of btn "btn-curseur-triangle" into xSensor
+   put the item 2 of the loc of btn "btn-curseur-triangle" into ySensor
+   put the item 1 of the loc of btn "btn-cadre-triangle" into xCadreTriangle
+   put the item 2 of the loc of btn "btn-cadre-triangle" into yCadreTriangle
+   put (xSensor - xCadreTriangle) into xHalfSize
+   put (ySensor - yCadreTriangle) into yHalfSize
+   if (xHalfSize < 15) then
+      answer "Votre forme sera trop petite si vous continuez de la reduire"
+      put 20 into xHalfSize
+      put 20 into yHalfsize
+      set the width of btn "btn-cadre-triangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-triangle" to (2*yHalfSize)
+      set the width of graphic "triangle" to (2*xHalfSize)
+      set the height of graphic "triangle" to (2*yHalfSize)
+      add xHalfSize to xCadreTriangle
+      add yHalfSize to yCadreTriangle
+      set the loc of btn "btn-curseur-triangle" to  xCadreTriangle,yCadreTriangle
+   else
+      set the width of btn "btn-cadre-triangle" to (2*xHalfSize)
+      set the height of btn "btn-cadre-triangle" to (2*yHalfSize)
+      set the width of graphic "triangle" to (2*xHalfSize)
+      set the height of graphic "triangle" to (2*yHalfSize)
+      add xHalfSize to xCadreTriangle
+      add yHalfSize to yCadreTriangle
+      set the loc of btn "btn-curseur-triangle" to  xCadreTriangle,yCadreTriangle
+   end if
+end resizeTriangle
+
+command placeForm
+      if gForms = 1 then
+            set the visible of graphic "circle" to true
+            set the height of graphic "circle" to 120
+            set the width of graphic "circle" to 120
+            set the loc of graphic "circle" to 682,384
+            set the layer of graphic "circle" to 10
+            set the opaque of graphic "circle" to false
+            set the lineSize of graphic "circle" to 4
+            set the blendLevel of graphic "circle" to 0
+            placeCircle
+            set the script of graphic "circle" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   placeCircle" & cr & "end mouseUp"
+            set the script of btn "btn-curseur-circle" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeCircle" & cr & "end mouseUp"
+         else if gForms = 2 then   
+            set the visible of graphic "rectangle" to true
+            set the loc of graphic "rectangle" to 682,384
+            set the width of graphic "rectangle" to 120
+            set the height of graphic "rectangle" to 90
+            set the layer of the graphic "rectangle" to 11
+            set the opaque of graphic "rectangle" to false
+            set the lineSize of graphic "rectangle" to 4
+            set the blendLevel of graphic "rectangle" to 0
+            placeRectangle
+            set the script of graphic "rectangle" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   placeRectangle" & cr & "end mouseUp"
+         set the script of btn "btn-curseur-rectangle" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeRectangle" & cr & "end mouseUp"
+         else if gForms = 3 then
+            set the visible of graphic "square" to true
+            set the loc of graphic "square" to 682,384
+            set the width of graphic "square" to 120
+            set the height of graphic "square" to 120
+            set the layer of graphic "square" to 12
+            set the opaque of graphic "square" to false
+            set the lineSize of graphic "square" to 4
+            set the blendLevel of graphic "square" to 0
+            placeSquare
+            set the script of graphic "square" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown"& cr & "on mouseUp" & cr & "   placeSquare" & cr & "end mouseUp"
+          set the script of btn "btn-curseur-square" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeSquare" & cr & "end mouseUp"
+         else if gForms = 4 then
+            set the visible of graphic "triangle" to true
+            set the loc of graphic "triangle" to 682,384
+            set the width of graphic "triangle" to 120
+            set the height of graphic "triangle" to 120
+            set the layer of graphic "triangle" to 13
+            set the opaque of graphic "triangle" to false
+            set the lineSize of graphic "triangle" to 4
+            set the blendLevel of graphic "triangle" to 0
+            placeTriangle
+            set the script of graphic "triangle" to "on mouseDown" & cr & "grab me" & cr & "end mouseDown" & cr & "on mouseUp" & cr & "   placeTriangle" & cr & "end mouseUp"
+          set the script of btn "btn-curseur-triangle" to "on mouseDown" & cr & "   grab me" & cr & " end mouseDown" & cr & "on mouseUp" & cr & "   resizeTriangle" & cr & "end mouseUp"
+         end if
+   end placeForm
+
+   command pointeurSelected
+      set the showBorder of btn "tool5" to true
+      set the borderWidth of btn "tool5" to 2
+      set the visible of btn "btn-pointeur" to true
+      pencilUnselected
+      lineUnselected
+      eraserUnselected
+      formUnselected
+   end pointeurSelected
+   
+   command pointeurUnselected
+      set the showBorder of btn "tool5" to false
+      set the borderWidth of btn "tool5" to 0
+      set the visible of btn "btn-pointeur" to false
+   end pointeurUnselected
+
+   command colorSelected col
+      put 1 into lctr
+      repeat while lctr <=16
+         if lctr = col then
+            set the showBorder of btn ("btn-palette" & lctr) to true 
+            set the borderWidth of btn ("btn-palette" & lctr) to 2
+            set the borderColor of btn ("btn-palette" & lctr)  to 210,105,30
+         else
+            set the showborder of btn ("btn-palette" & lctr) to false
+            set the borderWidth of btn ("btn-palette" & lctr)  to 0
+      end if
+      add 1 to lctr
+      end repeat
+   end colorSelected
+   
+     command exitLecon
+      set the width of btn "btn-sortie" to 20
+      set the height of btn "btn-sortie" to 20
+      set the opaque of btn "btn-sortie" to true
+      set the threeD of btn "btn-sortie" to false
+      set the showBorder of btn "btn-sortie" to false
+      set the borderWidth of btn "btn-sortie" to 0
+      set the loc of btn "btn-sortie" to 1354,10
+      set the lockLoc of btn "btn-sortie" to true
+      set the label of btn "btn-sortie" to "X"
+      set the textAlign of btn "btn-sortie" to "center"
+      set the textColor of btn "btn-sortie" to "white"
+      set the backgroundColor of btn "btn-sortie" to 105,105,105
+      set the script of btn "btn-sortie" to "on mouseUp" & cr & "close stack " & quote & "toolbox" & quote & cr & "end mouseUp"
+   end exitLecon
+   
+   command shortToolbar
+      set the loc of img "peinture" to 700,250
+      set the visible of btn "tool7" to false
+      set the height of btn "toolbar" to 370
+      set the loc of btn "toolbar" to 100,275
+      set the loc of grp "Palette" to 110,500
+      set the loc of btn "toolbar" to 100,250
+   end shortToolbar
